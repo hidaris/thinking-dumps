@@ -6,7 +6,10 @@
 
 ;; for some const types
 (define env0
-  '((+ . (num -> num -> num))))
+  '((+ . (num -> num -> num))
+    (nil . Null)
+    (cons . (case-> (num -> (list num) -> (list num))
+                    (num -> num -> (num * num))))))
 
 (define lookup
   (λ (var Γ)
@@ -46,6 +49,16 @@
            (error 'call
                   "call's params type should be ~s but get ~s"
                   argτ τ2)))]
+    [`(cons ,e1 ,e2)
+     (let ([τ1 (typeof Γ e1)]
+           [τ2 (typeof Γ e2)])
+       (if (and (list? τ2)
+                (eq? 'list (car τ2))
+                (eq? τ1 (cadr τ2)))
+           `(list ,τ1)
+           (if (eq? τ2 'Null)
+               `(list ,τ1)
+               `(,τ1 * ,τ2))))]
     [_ (error 'typeof
               "unsupport type")]))
 
