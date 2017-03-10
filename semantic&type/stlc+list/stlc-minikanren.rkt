@@ -21,7 +21,7 @@
        (typeofo Γ e1 'num)
        (typeofo Γ e2 'num)
        (== 'num τ))]
-    ;; const types: +
+    ;; const types: +, nil, cons
     [(fresh (_)
        (== '+ e)
        (== '(num -> num -> num) τ))]
