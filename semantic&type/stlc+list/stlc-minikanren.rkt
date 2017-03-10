@@ -21,6 +21,19 @@
        (typeofo Γ e1 'num)
        (typeofo Γ e2 'num)
        (== 'num τ))]
+    ;; const types: +
+    [(fresh (_)
+       (== '+ e)
+       (== '(num -> num -> num) τ))]
+    [(fresh (_)
+       (== 'nil e)
+       (== 'Null τ))]
+    [(fresh (_)
+       (== 'cons e)
+       (== '(case-> (num -> (list num) -> (list num))
+                    (num -> num -> (num * num)))
+           τ))]
+    ;; const types over
     [(fresh (x e^ τ1 τ2)
        (== `(λ (,x ,τ1) ,e^) e)
        (== `(,τ1 -> ,τ2) τ)
@@ -34,7 +47,43 @@
        (== `(if0 ,e1 ,e2 ,e3) e)
        (typeofo Γ e1 'num)
        (typeofo Γ e2 τ)
-       (typeofo Γ e3 τ))]))
+       (typeofo Γ e3 τ))]
+    ;; cons(num, num)
+    [(fresh (e1 e2 τ1 τ2)
+       (== `(cons ,e1 ,e2) e)
+       (== `(,τ1 * ,τ2) τ)
+       (=/= e2 'nil)
+       (numbero e2)
+       (typeofo Γ e1 τ1)
+       (typeofo Γ e2 τ2))]
+    ;; cons(num, cons(num, cons(num num)))
+    [(fresh (e1 e2 τ1 τ2)
+       (== `(cons ,e1 ,e2) e)
+       (== `(,τ1 * ,τ2) τ)
+       (=/= e2 'nil)
+       (fresh (e3 e4)
+         (== e2 `(cons ,e3 ,e4))
+         (=/= e4 'nil))
+       (typeofo Γ e1 τ1)
+       (typeofo Γ e2 τ2))]
+    ;; cons(1, cons(2, nil)) => '(1 2)
+    [(fresh (e1 e2 τ1 τ2)
+       (== `(cons ,e1 ,e2) e)
+       (== `(list ,τ1) τ)
+       (=/= e2 'nil)
+       (fresh (e3 e4)
+         (== e2 `(cons ,e3 ,e4))
+         (== e4 'nil))
+       (typeofo Γ e1 τ1)
+       (typeofo Γ e2 τ2)
+       (== τ1 τ2))]
+    ;; cons(1, nil)
+    [(fresh (e1 e2 τ1 τ2)
+       (== `(cons ,e1 ,e2) e)
+       (== `(list ,τ1) τ)
+       (== e2 'nil)
+       (typeofo Γ e1 τ1)
+       (typeofo Γ e2 τ2))]))
 
 (define (lookupo Γ x t)
   (fresh ()
