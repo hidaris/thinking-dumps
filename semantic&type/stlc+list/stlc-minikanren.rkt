@@ -3,17 +3,8 @@
 ;; a relational simple typed lambda calculus inferencer
 ;; extend with tuple type and list type
 
-;; macro for test
-(define-syntax test
-  (syntax-rules ()
-    [(_ title tested-expression expected-result)
-     (begin
-       (printf "Testing ~s\n" title)
-       (let* ([expected expected-result]
-              [produced tested-expression])
-         (or (equal? expected produced)
-             (printf "Failed: ~a~%Expected: ~a~%Computed: ~a~%"
-                     'tested-expression expected produced))))]))
+(module+ test
+  (require rackunit))
 
 ;; infer the type of expression
 (define (infer expr)
@@ -115,86 +106,89 @@
          (=/= x y)
          (lookupo Γ^ x t))])))
 
-;; test infer
-(test "typeof number"
-      (infer 1)
-      'num)
+;; unit test
+(module+ test
+  ;; test infer
+  (test-equal? "test num"
+        (infer 1)
+        'num)
 
-;; test const type
-(test "typeof nil"
-      (infer 'nil)
-      'Null)
+  ;; test const type
+  (test-equal? "test nil"
+        (infer 'nil)
+        'Null)
 
-(test "typeof +"
-      (infer '+)
-      '(num -> num -> num))
+  (test-equal? "test type of plus"
+        (infer '+)
+        '(num -> num -> num))
 
-(test "typeof cons"
-      (infer 'cons)
-      '(case-> (num -> (list num) -> (list num))
-               (num -> num -> (num * num))))
-;; test const type over
+  (test-equal? "test type of cons"
+        (infer 'cons)
+        '(case-> (num -> (list num) -> (list num))
+                 (num -> num -> (num * num))))
+  ;; test const type over
 
-(test "typeof + function"
-      (infer '(+ 2 3))
-      'num)
+  (test-equal? "test type of plus's value"
+        (infer '(+ 2 3))
+        'num)
 
-(test "typeof cons0"
-      (infer '(cons 2 3))
-      '(num * num))
+  (test-equal? "test type of cons's value"
+        (infer '(cons 2 3))
+        '(num * num))
 
-(test "typeof cons1"
-      (infer '(cons 2 nil))
-      '(list num))
+  (test-equal? "test cons num nil"
+        (infer '(cons 2 nil))
+        '(list num))
 
-(test "typeof cons2"
-      (infer '(cons 1 (cons 2 3)))
-      '(num * (num * num)))
+  (test-equal? "test cons num (num * num)"
+        (infer '(cons 1 (cons 2 3)))
+        '(num * (num * num)))
 
-(test "typeof cons3"
-      (infer '(cons 1 (cons 2 nil)))
-      '(list num))
+  (test-equal? "test cons num (list num)"
+        (infer '(cons 1 (cons 2 nil)))
+        '(list num))
 
-(test "typeof if0"
-      (infer '(if0 0 2 1))
-      'num)
+  (test-equal? "test if0"
+        (infer '(if0 0 2 1))
+        'num)
 
-(test "typeof λ"
-      (infer '(λ (x num) x))
-      '(num -> num))
+  (test-equal? "test function"
+        (infer '(λ (x num) x))
+        '(num -> num))
 
-(test "typeof application"
-      (infer '((λ (x num) x) 2))
-      'num)
+  (test-equal? "test application"
+        (infer '((λ (x num) x) 2))
+        'num)
 
-;; test run backwards
-(test "generate 2 num exp"
-      (gen-exp 2 'num)
-      '((_.0 (num _.0))
-        ((+ _.0 _.1) (num _.0 _.1))))
+  ;; check run backwards
+  (test-equal? "test gen2 num"
+        (gen-exp 2 'num)
+        '((_.0 (num _.0))
+          ((+ _.0 _.1) (num _.0 _.1))))
 
-(test "generate 2 (num -> num -> num) exp"
-      (gen-exp 2 '(num -> num -> num))
-      '(+
-        ((if0 _.0 + +) (num _.0))))
+  (test-equal? "test gen2 (num * num)"
+         (gen-exp 2 '(num * num))
+         '(((cons _.0 _.1) (num _.0 _.1))
+           ((cons (+ _.0 _.1) _.2) (num _.0 _.1 _.2))))
 
-(test "generate 2 Null exp"
-      (gen-exp 2 'Null)
-      '(nil
-        ((if0 _.0 nil nil) (num _.0))))
+  (test-equal? "test gen2 (num -> num -> num)"
+        (gen-exp 2 '(num -> num -> num))
+        '(+
+          ((if0 _.0 + +) (num _.0))))
 
-(test "generate 2 cons type exp"
-      (gen-exp 2 '(case-> (num -> (list num) -> (list num))
-                          (num -> num -> (num * num))))
-      '(cons
-        ((if0 _.0 cons cons) (num _.0))))
+  (test-equal? "test gen2 Null"
+        (gen-exp 2 'Null)
+        '(nil
+          ((if0 _.0 nil nil) (num _.0))))
 
-(test "generate 2 (num * num) exp"
-      (gen-exp 2 '(num * num))
-      '(((cons _.0 _.1) (num _.0 _.1))
-        ((cons (+ _.0 _.1) _.2) (num _.0 _.1 _.2))))
+  (test-equal? "test gen2 cons type"
+        (gen-exp 2 '(case-> (num -> (list num) -> (list num))
+                            (num -> num -> (num * num))))
+        '(cons
+          ((if0 _.0 cons cons) (num _.0))))
 
-(test "generate 2 (list num) exp"
-      (gen-exp 2 '(list num))
-      '(((cons _.0 _.1) (num _.0 _.1))
-        ((cons _.0 +) (num _.0))))
+  (test-equal? "test gen2 (list num)"
+        (gen-exp 2 '(list num))
+        '(((cons _.0 _.1) (num _.0 _.1))
+          ((cons _.0 +) (num _.0))))
+  )
