@@ -12,27 +12,33 @@
      (cons e e)
      (o e) ;; op for cons: hd, tl
      c)
+  ;; const exp
   (c nil
      number
+     +
      cons)
   (o hd tl)
   ; types
   (τ num
       (τ -> τ)
       (τ * τ)
+      (list τ)
+      ;; for const type + cons nil
+      (num -> num -> num)
       (case-> (num -> (list num) -> (list num))
               (num -> num -> num))
-      Null
-      (list τ))
+      Null)
   ; value forms
   (v number
      (λ (x τ) e)
      (cons v v))
+  ;; evaluate context
   (E hole
      (v E) (E e)
      (if0 E e e)
      (+ E e) (+ v E)
      (cons E e) (cons e E))
+  ;; type environment
   (Γ ·
       (x τ Γ))
   (x variable-not-otherwise-mentioned))
@@ -92,8 +98,10 @@
 
   [(typeof Γ e_1 τ_1)
    (typeof Γ e_2 τ_2)
-   (side-condition (different Null τ_2)
-    )
+   ;; shouldn't handle (cons 2 nil)
+   (side-condition (different Null τ_2))
+   ;; shouldn't hanlde (cons 2 (cons 3 nil))
+   (side-condition (different (list num) τ_2))
    ------------------------------------------
    (typeof Γ (cons e_1 e_2) (τ_1 * τ_2))]
   )
@@ -102,6 +110,7 @@
   const-type : c -> τ
   [(const-type nil) Null]
   [(const-type number) num]
+  [(const-type +) (num -> num -> num)]
   [(const-type cons) (case-> (num -> (list num) -> (list num))
                              (num -> num -> num))])
 
@@ -123,3 +132,30 @@
     [_ (error 'typecheck
               "multiple typing derivations for term ~a in environment ~a"
               e Γ)]))
+
+(test-equal (typecheck (term ·) (term 1)) (term num))
+(test-equal (typecheck (term ·) (term (+ 1 (+ 2 3)))) (term num))
+(test-equal (typecheck (term ·) (term +)) (term (num -> num -> num)))
+(test-equal (typecheck (term ·) (term nil)) (term Null))
+(test-equal (typecheck (term ·) (term cons))
+            (term (case-> (num -> (list num) -> (list num))
+                          (num -> num -> num))))
+(test-equal (typecheck (term ·) (term (if0 0 2 3))) (term num))
+(test-equal (typecheck (term ·)
+                       (term (λ (f (num -> num))
+                               (λ (x num)
+                                 (f x)))))
+            (term ((num -> num) -> (num -> num))))
+(test-equal (typecheck (term ·)
+                       (term (((λ (f (num -> num))
+                                 (λ (x num)
+                                   (f x)))
+                               (λ (x num) x))
+                              1)))
+            (term num))
+(test-equal (typecheck (term ·) (term (cons 2 3))) (term (num * num)))
+(test-equal (typecheck (term ·) (term (cons 2 nil))) (term (list num)))
+(test-equal (typecheck (term ·) (term (cons 2 (cons 3 4))))
+            (term (num * (num * num))))
+(test-equal (typecheck (term ·) (term (cons 2 (cons 3 nil)))) (term (list num)))
+(test-results)
