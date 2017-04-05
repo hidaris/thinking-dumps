@@ -35,21 +35,25 @@
        (typeofo Γ e1 'num)
        (typeofo Γ e2 τ)
        (typeofo Γ e3 τ))]
-    [(fresh (t τ₁ τ₂)
-       (== `(inl ,t) e)
-       (typeofo Γ t `(,τ₁ + ,τ₂))
+    [(fresh (t τ₁)
+       (== `(,t as ,τ₁) e)
+       (typeofo Γ t τ₁)
        (== τ₁ τ))]
     [(fresh (t τ₁ τ₂)
-       (== `(inr ,t) e)
-       (typeofo Γ t `(,τ₁ + ,τ₂))
-       (== τ₂ τ))]
-    [(fresh (e1 e2 e3 x1 x2 τ₁ τ₂ τ₃ τ₄)
+       (== `((inl ,t) as (,τ₁ + ,τ₂)) e)
+       (typeofo Γ t τ₁)
+       (== `(,τ₁ + ,τ₂) τ))]
+    [(fresh (t τ₁ τ₂)
+       (== `((inr ,t) as (,τ₁ + ,τ₂)) e)
+       (typeofo Γ t τ₂)
+       (== `(,τ₁ + ,τ₂) τ))]
+    [(fresh (e1 e2 e3 x τ₁ τ₂ τ₃)
        (== `(case ,e1 of
-                  (inl ,x1) => ,e2
-                ! (inr ,x2) => ,e3) e)
+                  (inl ,x) => ,e2
+                ! (inr ,x) => ,e3) e)
        (typeofo Γ e1 `(,τ₁ + ,τ₂))
-       (typeofo `((,x1 : ,τ₁) . ,Γ) e2 τ₃)
-       (typeofo `((,x2 : ,τ₂) . ,Γ) e3 τ₃)
+       (typeofo `((,x : ,τ₁) . ,Γ) e2 τ₃)
+       (typeofo `((,x : ,τ₂) . ,Γ) e3 τ₃)
        (== τ₃ τ))]))
 
 (define (lookupo Γ x t)

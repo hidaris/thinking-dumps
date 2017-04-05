@@ -36,16 +36,17 @@
                   "if0's branches should have same type")))]
     [(? symbol? x) (lookup x Γ)]
     [`(λ (,x ,τ) ,e^)
-     `(,τ -> ,(typeof (extend-env x τ Γ) e^))]
+     (let ([τ_res (typeof (extend-env x τ Γ) e^)])
+       `(,τ -> ,τ_res))]
     [`(,e1 ,e2) ;; ((x -> y) x)
-     (let* ([τ1 (typeof Γ e1)]
-            [τ2 (typeof Γ e2)]
-            [argτ (car τ1)])
-       (if (eq? argτ τ2)
-           (list-ref τ1 2)
-           (error 'call
-                  "call's params type should be ~s but get ~s"
-                  argτ τ2)))]
+     (let* ([τ (typeof Γ e1)]
+            [τ1 (typeof Γ e2)]
+            [argt (car τ)])
+       (match τ
+         [`(,τ1 -> ,τ2) τ2]
+         [_ (error 'call
+                   "call's params type should be ~s but get ~s"
+                   argt τ1)]))]
     [_ (error 'typeof
               "unsupport type")]))
 
