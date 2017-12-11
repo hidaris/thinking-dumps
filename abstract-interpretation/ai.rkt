@@ -1,5 +1,8 @@
 #lang racket
 
+;; Code from the Friedman and Mendhekar tutorial
+;; https://www.cs.indiana.edu/l/www/classes/b621/abiall.pdf
+
 ;; environment
 (define empty-env
   (λ ()
@@ -27,6 +30,16 @@
        (value-of body (extend-env x arg env))])))
 
 ;;; helper functions
+;; -----
+;; Not in paper but needed.
+;; (define (set-diff xs ys) (remq* ys xs))
+
+;; (define union append)
+
+;; (define (set-equiv? x y)
+;;   (and (andmap (λ (x1) (member x1 y Ds-closure-equiv?)) x)
+;;        (andmap (λ (y1) (member y1 x Ds-closure-equiv?)) y)))
+
 (define (union set1 set2)
   (cond
     [(eq? set1 null) set2]
