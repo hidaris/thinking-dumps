@@ -6,7 +6,7 @@
 (: parse (-> Any Expression))
 (define (parse sexp)
   (match sexp
-    [(? number? x) (Const x)]
+    [(? real? x) (Const x)]
     [(? symbol? x) (Var x)]
     [`(- ,n1 ,n2)
      (Diff (parse n1) (parse n2))]

@@ -12,7 +12,7 @@
      Let
      Minus))
 
-(struct Const ([n : Number])
+(struct Const ([n : Real])
   #:transparent)
 
 (struct Diff ([n1 : Expression]
@@ -36,7 +36,7 @@
   #:transparent)
 
 ;; add minus by 3-6, hidaris
-(struct Minus ([val : Expression])
+(struct Minus ([n : Expression])
   #:transparent)
 
 ;;; Value
@@ -44,7 +44,7 @@
   (U Num
      Bool))
 
-(struct Num ([n : Number])
+(struct Num ([n : Real])
   #:transparent)
 
 (struct Bool ([b : Boolean])
@@ -60,12 +60,12 @@
 
 
 (: val->num
-   (-> Value Number))
+   (-> Value Real))
 (define (val->num val)
   (match val
     [(Num n) n]
     [_ (error 'type-mismatch
-            "~n expect type ~s " 'Number)]))
+            "~n expect type ~s " 'Real)]))
 
 (: val->bool
    (-> Value Boolean))

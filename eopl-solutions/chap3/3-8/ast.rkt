@@ -13,9 +13,12 @@
      Minus
      Add
      Mult
-     Div))
+     Div
+     IsGreater
+     IsEqual
+     IsLess))
 
-(struct Const ([n : Real])
+(struct Const ([n : (U Real Boolean)])
   #:transparent)
 
 (struct Diff ([n1 : Expression]
@@ -53,6 +56,19 @@
 
 (struct Div ([n1 : Expression]
              [n2 : Expression])
+  #:transparent)
+
+;; add 3-8 equal?, greater?, less? , hidaris
+(struct IsEqual ([n1 : Expression]
+                 [n2 : Expression])
+  #:transparent)
+
+(struct IsGreater ([n1 : Expression]
+                   [n2 : Expression])
+  #:transparent)
+
+(struct IsLess ([n1 : Expression]
+                [n2 : Expression])
   #:transparent)
 
 ;;; Value
