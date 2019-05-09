@@ -18,57 +18,70 @@
      IsEqual
      IsLess))
 
-(struct Const ([n : (U Real Boolean)])
+(struct Const
+  ([n : (U Real Boolean)])
   #:transparent)
 
-(struct Diff ([n1 : Expression]
-              [n2 : Expression])
+(struct Diff
+  ([n1 : Expression]
+   [n2 : Expression])
   #:transparent)
 
-(struct IsZero ([n : Expression])
+(struct IsZero
+  ([n : Expression])
   #:transparent)
 
-(struct If ([test : Expression]
-            [then : Expression]
-            [else : Expression])
+(struct If
+  ([test : Expression]
+   [then : Expression]
+   [else : Expression])
   #:transparent)
 
-(struct Var ([v : Symbol])
+(struct Var
+  ([v : Symbol])
   #:transparent)
 
-(struct Let ([var : Symbol]
-             [val : Expression]
-             [body : Expression])
+(struct Let
+  ([var : Symbol]
+   [val : Expression]
+   [body : Expression])
   #:transparent)
 
 ;; add minus by 3-6, hidaris
-(struct Minus ([n : Expression])
+(struct Minus
+  ([n : Expression])
   #:transparent)
 
 ;; add +, - , * , /, 3-7, by hidaris
-(struct Add ([n1 : Expression]
-             [n2 : Expression])
+(struct Add
+  ([n1 : Expression]
+   [n2 : Expression])
   #:transparent)
 
-(struct Mult ([n1 : Expression]
-              [n2 : Expression])
+(struct Mult
+  ([n1 : Expression]
+   [n2 : Expression])
   #:transparent)
 
-(struct Div ([n1 : Expression]
-             [n2 : Expression])
+(struct Div
+  ([n1 : Expression]
+   [n2 : Expression])
   #:transparent)
 
 ;; add 3-8 equal?, greater?, less? , hidaris
-(struct IsEqual ([n1 : Expression]
-                 [n2 : Expression])
+(struct IsEqual
+  ([n1 : Expression]
+   [n2 : Expression])
   #:transparent)
 
-(struct IsGreater ([n1 : Expression]
-                   [n2 : Expression])
+(struct IsGreater
+  ([n1 : Expression]
+   [n2 : Expression])
   #:transparent)
 
-(struct IsLess ([n1 : Expression]
-                [n2 : Expression])
+(struct IsLess
+  ([n1 : Expression]
+   [n2 : Expression])
   #:transparent)
 
 ;;; Value
@@ -76,18 +89,24 @@
   (U Num
      Bool))
 
-(struct Num ([n : Real])
+(struct Num
+  ([n : Real])
   #:transparent)
 
-(struct Bool ([b : Boolean])
+(struct Bool
+  ([b : Boolean])
   #:transparent)
 
 (define-type TopLevel (U ExpTop))
-(struct ExpTop ([e : Expression])
+
+(struct ExpTop
+  ([e : Expression])
   #:transparent)
 
 (define-type Program (U AProgram))
-(struct AProgram ([t : TopLevel])
+
+(struct AProgram
+  ([t : TopLevel])
   #:transparent)
 
 
@@ -97,7 +116,8 @@
   (match val
     [(Num n) n]
     [_ (error 'type-mismatch
-            "~n expect type ~s " 'Real)]))
+              "~n expect type ~s "
+              'Real)]))
 
 (: val->bool
    (-> Value Boolean))
@@ -105,7 +125,8 @@
   (match val
     [(Bool b) b]
     [_ (error 'type-mismatch
-            "~n expect type ~s" 'Boolean)]))
+              "~n expect type ~s"
+              'Boolean)]))
 
 (: value->string
    (-> Value String))
