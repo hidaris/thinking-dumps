@@ -5,6 +5,7 @@
 ;;; Expression
 (define-type Expression
   (U Const
+     BoolExp
      Diff
      IsZero
      If
@@ -19,7 +20,11 @@
      IsLess))
 
 (struct Const
-  ([n : (U Real Boolean)])
+  ([n : Real])
+  #:transparent)
+
+(struct BoolExp
+  ([n : Boolean])
   #:transparent)
 
 (struct Diff

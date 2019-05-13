@@ -7,7 +7,7 @@
 (define (parse sexp)
   (match sexp
     [(? real? x) (Const x)]
-    [(? boolean? x) (Const x)]
+    [(? boolean? x) (BoolExp x)]
     [(? symbol? x) (Var x)]
     [`(- ,n1 ,n2)
      (Diff (parse n1) (parse n2))]
