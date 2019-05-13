@@ -1228,11 +1228,15 @@ Theorem andb_true_elim2 : forall b c : bool,
   andb b c = true -> c = true.
 Proof.
   intros b c. destruct b eqn:Eb.
-  - destruct c eqn:Ec.
+  - simpl.
+    intros H. rewrite -> H. reflexivity.
+  - simpl.
+    intros H.
+    destruct c eqn:Ec.
     + reflexivity.
-    + simpl. intros H. rewrite -> H. reflexivity.
-    - reflexivity.
-    + simpl. intros H. rewrite -> H. reflexivity.
+    + rewrite -> H.
+      reflexivity.
+    (* + simpl. intros H. rewrite -> H. reflexivity. *)
 Qed.
 
 (** **** Exercise: 1 star, standard (zero_nbeq_plus_1)  *)
@@ -1349,7 +1353,14 @@ Theorem identity_fn_applied_twice :
   (forall (x : bool), f x = x) ->
   forall (b : bool), f (f b) = b.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros f H b. destruct b eqn:Eb.
+  - rewrite -> H.
+    rewrite -> H.
+    simpl. reflexivity.
+  - rewrite -> H.
+    rewrite -> H.
+    simpl. reflexivity.
+Qed.
 
 (** [] *)
 
@@ -1358,6 +1369,19 @@ Proof.
     Now state and prove a theorem [negation_fn_applied_twice] similar
     to the previous one but where the second hypothesis says that the
     function [f] has the property that [f x = negb x]. *)
+Theorem negation_fn_applied_twice:
+  forall (f : bool -> bool),
+  (forall (x : bool), f x = negb x) ->
+  forall (b : bool), f (f b) = b.
+Proof.
+  intros f H b. destruct b eqn:Eb.
+  - rewrite -> H.
+    rewrite -> H.
+    simpl. reflexivity.
+  - rewrite -> H.
+    rewrite -> H.
+    simpl. reflexivity.
+Qed.
 
 (* FILL IN HERE *)
 (* The [Import] statement on the next line tells Coq to use the
@@ -1382,7 +1406,22 @@ Theorem andb_eq_orb :
   (andb b c = orb b c) ->
   b = c.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros b c. destruct b eqn:Eb.
+  (* - destruct c eqn:Ec. *)
+  (*   + simpl. *)
+  (*     reflexivity. *)
+  (*   + simpl. *)
+  (*     intros H. rewrite -> H. *)
+  (*     reflexivity. *)
+  (* - destruct c eqn:Ec. *)
+  (*   + simpl. *)
+  (*     intros H. rewrite -> H. *)
+  (*     reflexivity. *)
+  (*   + simpl. *)
+  (*     reflexivity. *)
+  - simpl. intros H. rewrite -> H. reflexivity.
+  - simpl. intros H. rewrite -> H. reflexivity.
+Qed.
 
 (** [] *)
 
@@ -1421,11 +1460,20 @@ Inductive bin : Type :=
         for binary numbers, and a function [bin_to_nat] to convert
         binary numbers to unary numbers. *)
 
-Fixpoint incr (m:bin) : bin
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint incr (m:bin) : bin :=
+  match m with
+  | Z     => B Z
+  | A n'  => B n'
+  | B n'  => A (incr n')
+  end.
 
-Fixpoint bin_to_nat (m:bin) : nat
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint bin_to_nat (m:bin) : nat :=
+  match m with
+  | Z => 0
+  | A n' => (bin_to_nat n') + (bin_to_nat n')
+  | B n' => S((bin_to_nat n') + (bin_to_nat n'))
+  end.
+
 
 (**    (b) Write five unit tests [test_bin_incr1], [test_bin_incr2], etc.
         for your increment and binary-to-unary functions.  (A "unit
@@ -1435,7 +1483,40 @@ Fixpoint bin_to_nat (m:bin) : nat
         then converting it to unary should yield the same result as
         first converting it to unary and then incrementing. *)
 
-(* FILL IN HERE *)
+Definition b0 := Z.
+Definition b1 := incr b0.
+Definition b2 := incr b1.
+Definition b3 := incr b2.
+Definition b4 := incr b3.
+Definition b5 := incr b4.
+Definition b6 := incr b5.
+Definition b7 := incr b6.
+Definition b8 := incr b7.
+Definition b9 := incr b8.
+
+Eval compute in b7.
+Eval compute in b8.
+
+Example test_bin_incr0: (bin_to_nat b0) = 0.
+Proof. reflexivity.  Qed.
+
+Example test_bin_incr1: (bin_to_nat b1) = 1.
+Proof. reflexivity.  Qed.
+
+Example test_bin_incr2: (bin_to_nat b2) = 2.
+Proof. reflexivity.  Qed.
+
+Example test_bin_incr3: (bin_to_nat b3) = 3.
+Proof. reflexivity.  Qed.
+
+Example test_bin_incr4: (bin_to_nat b4) = 4.
+Proof. reflexivity.  Qed.
+
+Example test_bin_incr5: (bin_to_nat b5) = 5.
+Proof. reflexivity.  Qed.
+
+Example test_bin_incr9: (bin_to_nat b9) = 9.
+Proof. reflexivity.  Qed.
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_binary : option (nat*string) := None.
