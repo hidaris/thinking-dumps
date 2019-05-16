@@ -23,16 +23,15 @@
     [(assq var env) => cdr]
     [else
      (error 'apply-env
-            "~n var ~s doesn't bound to a value" var)]))
+            "var ~s doesn't bound to a value" var)]))
 
 (: init-env
    (-> Environment))
-(define init-env
-  (lambda ()
-    (extend-env
-        'i (Num 1)
-        (extend-env
-            'v (Num 5)
-            (extend-env
-                'x (Num 10)
-                (empty-env))))))
+(define (init-env)
+  (extend-env
+      'i (Num 1)
+      (extend-env
+          'v (Num 5)
+          (extend-env
+              'x (Num 10)
+              (empty-env)))))

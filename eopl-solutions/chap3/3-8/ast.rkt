@@ -121,7 +121,7 @@
   (match val
     [(Num n) n]
     [_ (error 'type-mismatch
-              "~n expect type ~s "
+              "expect type ~s "
               'Real)]))
 
 (: val->bool
@@ -130,8 +130,18 @@
   (match val
     [(Bool b) b]
     [_ (error 'type-mismatch
-              "~n expect type ~s"
+              "expect type ~s"
               'Boolean)]))
+
+(: val->sval
+   (-> Value (U Boolean Real)))
+(define (val->sval val)
+  (match val
+    [(Num n) n]
+    [(Bool b) b]
+    [_ (error 'type-mismatch
+              "expect type ~s"
+              '(U Boolean Real))]))
 
 (: value->string
    (-> Value String))
