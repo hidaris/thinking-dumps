@@ -3,19 +3,29 @@
 (require "./ast.rkt")
 (provide (all-defined-out))
 
-(: parse (-> Any Expression))
-(define (parse sexp)
+;; easy version
+(: string->sexp (-> String Any))
+(define (string->sexp s)
+  (read (open-input-string s)))
+
+(: parse-sexp (-> Any Expression))
+(define (parse-sexp sexp)
   (match sexp
     [(? real? x) (Const x)]
     [(? symbol? x) (Var x)]
     [`(- ,n1 ,n2)
-     (Diff (parse n1) (parse n2))]
+     (Diff (parse-sexp n1) (parse-sexp n2))]
     [`(zero? ,n)
-     (IsZero (parse n))]
+     (IsZero (parse-sexp n))]
     [`(if ,test ,then ,else)
-     (If (parse test) (parse then) (parse else))]
+     (If (parse-sexp test) (parse-sexp then) (parse-sexp else))]
     [`(let ,(? symbol? var) ,val in ,body)
-     (Let var (parse val) (parse body))]
+     (Let var (parse-sexp val) (parse-sexp body))]
     [`(- ,n)
-     (Minus (parse n))]
+     (Minus (parse-sexp n))]
     ))
+
+(: parse (-> String Expression))
+(define (parse str)
+  (let ([sexp (string->sexp str)])
+    (parse-sexp sexp)))
