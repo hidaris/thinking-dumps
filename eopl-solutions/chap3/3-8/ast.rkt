@@ -102,18 +102,11 @@
   ([b : Boolean])
   #:transparent)
 
-(define-type TopLevel (U ExpTop))
-
-(struct ExpTop
-  ([e : Expression])
-  #:transparent)
-
 (define-type Program (U AProgram))
 
 (struct AProgram
-  ([t : TopLevel])
+  ([e : Expression])
   #:transparent)
-
 
 (: val->num
    (-> Value Real))

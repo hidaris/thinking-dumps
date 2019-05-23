@@ -9,7 +9,7 @@
 
 (define run
   (lambda (str)
-    (value-of (parse str) (init-env))))
+    (value-of-program (parse str))))
 
 (define (test-all)
   (for ([test-item test-list])

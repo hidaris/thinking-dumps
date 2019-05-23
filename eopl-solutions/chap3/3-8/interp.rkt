@@ -80,3 +80,9 @@
          (Bool (if (< sval1 sval2)
                    #t
                    #f))))]))
+
+(: value-of-program (-> Program Value))
+(define (value-of-program pgm)
+  (match pgm
+    ([AProgram exp1]
+     (value-of exp1 (init-env)))))

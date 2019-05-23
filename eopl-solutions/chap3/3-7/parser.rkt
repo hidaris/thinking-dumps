@@ -31,7 +31,7 @@
      (Div (parse-sexp n1) (parse-sexp n2))]
     ))
 
-(: parse (-> String Expression))
+(: parse (-> String Program))
 (define (parse str)
   (let ([sexp (string->sexp str)])
-    (parse-sexp sexp)))
+    (AProgram (parse-sexp sexp))))

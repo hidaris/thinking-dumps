@@ -55,3 +55,9 @@
        (let ([sval1 (val->num val1)]
              [sval2 (val->num val2)])
          (Num (/ sval1 sval2))))]))
+
+(: value-of-program (-> Program Value))
+(define (value-of-program pgm)
+  (match pgm
+    ([AProgram exp1]
+     (value-of exp1 (init-env)))))

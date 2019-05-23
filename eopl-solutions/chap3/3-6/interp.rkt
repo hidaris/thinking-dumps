@@ -37,3 +37,9 @@
      (let ([val (value-of n env)])
        (let ([sval (val->num val)])
          (Num (- sval))))]))
+
+(: value-of-program (-> Program Value))
+(define (value-of-program pgm)
+  (match pgm
+    ([AProgram exp1]
+     (value-of exp1 (init-env)))))
