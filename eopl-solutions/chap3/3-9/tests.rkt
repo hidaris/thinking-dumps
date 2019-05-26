@@ -75,4 +75,11 @@
       (check-null? "(null? (cons 2 3))" #f)
       (check-null? "(null? ())" #t)
 
+      (check-let-cons "(let x 4
+                         in (cons x
+                               (cons (cons (- x 1)
+                                       ())
+                                  ())))"
+                      (4 (3)))
+
       ))
