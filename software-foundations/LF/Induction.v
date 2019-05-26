@@ -3,7 +3,9 @@
 (** Before getting started, we need to import all of our
     definitions from the previous chapter: *)
 
-Require Export Basics.
+(* From LF Require Export Basics. *)
+(* Require Export Basic. *)
+
 
 (** For the [Require Export] to work, Coq needs to be able to
     find a compiled version of [Basics.v], called [Basics.vo], in a directory
@@ -99,7 +101,7 @@ Require Export Basics.
     also a neutral element on the _right_... *)
 
 Theorem plus_n_O_firsttry : forall n:nat,
-  n = n + 0.
+    n = n + 0.
 
 (** ... can't be done in the same simple way.  Just applying
   [reflexivity] doesn't work, since the [n] in [n + 0] is an arbitrary
@@ -117,7 +119,7 @@ Abort.
     get stuck in exactly the same way. *)
 
 Theorem plus_n_O_secondtry : forall n:nat,
-  n = n + 0.
+    n = n + 0.
 Proof.
   intros n. destruct n as [| n'] eqn:E.
   - (* n = 0 *)
@@ -175,7 +177,7 @@ Proof.
     [S n' = S (n' + 0)], which in turn follows from [IHn']. *)
 
 Theorem minus_diag : forall n,
-  minus n n = 0.
+    minus n n = 0.
 Proof.
   (* WORKED IN CLASS *)
   intros n. induction n as [| n' IHn'].
@@ -195,26 +197,36 @@ Proof.
     proven results. *)
 
 Theorem mult_0_r : forall n:nat,
-  n * 0 = 0.
+    n * 0 = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  induction n as [| n' IHn'].
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHn'. reflexivity.
+Qed.
 
 Theorem plus_n_Sm : forall n m : nat,
-  S (n + m) = n + (S m).
+    S (n + m) = n + (S m).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  induction n as [| n' IHn'].
+  - simpl. reflexivity.
+  - simpl. intros m. rewrite -> IHn'. reflexivity.
+Qed.
 
 Theorem plus_comm : forall n m : nat,
-  n + m = m + n.
+    n + m = m + n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m. induction n as [| n' IHn'].
+  - simpl. rewrite <- plus_n_O. reflexivity.
+  - simpl. rewrite <- plus_n_Sm. rewrite -> IHn'. reflexivity.
+Qed.
 
 Theorem plus_assoc : forall n m p : nat,
   n + (m + p) = (n + m) + p.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
-
+  intros n m p. induction n as [| n' IHn'].
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHn'. reflexivity.
+Qed.
 (** **** Exercise: 2 stars, standard (double_plus)
 
     Consider the following function, which doubles its argument: *)
@@ -229,7 +241,10 @@ Fixpoint double (n:nat) :=
 
 Lemma double_plus : forall n, double n = n + n .
 Proof.
-  (* FILL IN HERE *) Admitted.
+  induction n as [| n' IHn'].
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHn'. rewrite <- plus_n_Sm. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (evenb_S)
@@ -241,10 +256,19 @@ Proof.
     alternative characterization of [evenb (S n)] that works better
     with induction: *)
 
+Fixpoint evenb (n:nat) : bool :=
+  match n with
+  | O        => true
+  | S O      => false
+  | S (S n') => evenb n'
+  end.
+
 Theorem evenb_S : forall n : nat,
   evenb (S n) = negb (evenb n).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  induction n as [| n' IHn'].
+  - simpl. reflexivity.
+  - simpl.
 (** [] *)
 
 (** **** Exercise: 1 star, standard (destruct_induction)
