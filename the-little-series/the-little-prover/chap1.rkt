@@ -1,8 +1,11 @@
-#lang dracula
+#lang racket/base
+
 ;; Load the J-Bob language:
-(include-book "j-bob-lang" :dir :teachpacks)
+(require "./j-bob/j-bob-lang.rkt")
 ;; Load J-Bob, our little proof assistant:
-(include-book "j-bob" :dir :teachpacks)
+(require "./j-bob/j-bob.rkt")
+;; Load the transcript of all proofs in the book:
+(require "./j-bob/little-prover.rkt")
 ;;; Old Games, New Rules
 
 ;;; The Axioms of Cons (initial)

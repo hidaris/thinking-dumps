@@ -1,8 +1,9 @@
-#lang dracula
+#lang racket/base
+
 ;; Load the J-Bob language:
-(include-book "j-bob-lang" :dir :teachpacks)
+(require "./j-bob-lang.rkt")
 ;; Load J-Bob, our little proof assistant:
-(include-book "j-bob" :dir :teachpacks)
+(require "./j-bob.rkt")
 
 ;; The first argument to J-Bob/step is a list of representations
 ;; of definitions, in this case (prelude) representing J-Bob's axioms
