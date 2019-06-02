@@ -6,18 +6,18 @@
 (define-type Environment (Listof (Pairof Symbol Value)))
 
 (: empty-env
-   (-> Environment))
+   (→ Environment))
 (define (empty-env) '())
 
 (: extend-env
-   (-> Symbol Value Environment
-       Environment))
+   (→ Symbol Value Environment
+      Environment))
 (define (extend-env var val env)
   (cons `(,var . ,val) env))
 
 (: apply-env
-   (-> Symbol Environment
-       Value))
+   (→ Symbol Environment
+      Value))
 (define (apply-env var env)
   (cond
     [(assq var env) => cdr]
@@ -26,12 +26,12 @@
             "var ~s doesn't bound to a value" var)]))
 
 (: init-env
-   (-> Environment))
+   (→ Environment))
 (define (init-env)
   (extend-env
-      'i (Num 1)
+    'i (Num 1)
+    (extend-env
+      'v (Num 5)
       (extend-env
-          'v (Num 5)
-          (extend-env
-              'x (Num 10)
-              (empty-env)))))
+        'x (Num 10)
+        (empty-env)))))

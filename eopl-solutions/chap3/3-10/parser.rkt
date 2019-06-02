@@ -9,8 +9,8 @@
   (read (open-input-string s)))
 
 (: parse-list
-   (-> (Listof Expression)
-       Expression))
+   (→ (Listof Expression)
+      Expression))
 (define (parse-list lst)
   (match lst
     ['() (EmptyList)]
@@ -18,7 +18,7 @@
      (Cons fst
            (parse-list snd))]))
 
-(: parse-sexp (-> Any Expression))
+(: parse-sexp (→ Any Expression))
 (define (parse-sexp sexp)
   (match sexp
     [(? real? x) (Const x)]
@@ -72,7 +72,7 @@
      (parse-list (map parse-sexp (cdr sexp)))]
     ))
 
-(: parse (-> String Program))
+(: parse (→ String Program))
 (define (parse str)
   (let ([sexp (string->sexp str)])
     (AProgram (parse-sexp sexp))))

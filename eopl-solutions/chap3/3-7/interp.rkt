@@ -7,8 +7,8 @@
 (require "./env.rkt")
 
 (: value-of
-   (-> Expression Environment
-       Value))
+   (→ Expression Environment
+      Value))
 (define (value-of exp env)
   (match exp
     [(Const n) (Num n)]
@@ -56,7 +56,7 @@
              [sval2 (val->num val2)])
          (Num (/ sval1 sval2))))]))
 
-(: value-of-program (-> Program Value))
+(: value-of-program (→ Program Value))
 (define (value-of-program pgm)
   (match pgm
     ([AProgram exp1]
