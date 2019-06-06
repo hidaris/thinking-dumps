@@ -1,150 +1,77 @@
-(module interp (lib "eopl.ss" "eopl")
+#lang typed/racket
 
-  ;; interpreter for the LET language.  The \commentboxes are the
-  ;; latex code for inserting the rules into the code in the book.
-  ;; These are too complicated to put here, see the text, sorry.
+(provide (all-defined-out))
 
-  (require "drscheme-init.rkt")
+(require "./parser.rkt")
+(require "./ast.rkt")
+(require "./env.rkt")
+(require "./utils.rkt")
 
-  (require "lang.rkt")
-  (require "data-structures.rkt")
-  (require "environments.rkt")
+(: value-of-unary (→ Unary Env Value))
+(define (value-of-unary unary env)
+  (let ([op (Var-name (Unary-op unary))]
+        [val (value-of (Unary-e unary) env)])
+    (cond
+      [(num-unary? op) (arith-unary op val)]
+      [(list-unary? op)
+       (case op
+         [(car) (val->car val)]
+         [(cdr) (val->cdr val)]
+         [(null?) (match val
+                    [(EmptyListVal) (Const #t)]
+                    [_ (Const #f)])]
+         [else
+          (abort 'value-of
+                 "undefined operator on numbers: " op)])]
+      [else
+       (abort 'value-of
+              "only operate on number or list, but got: " (Unary-e unary))])))
 
-  (provide value-of-program value-of)
+(: value-of-binary (→ Binary Env Value))
+(define (value-of-binary binary env)
+  (let ([op (Var-name (Binary-op binary))]
+        [val1 (value-of (Binary-n1 binary) env)]
+        [val2 (value-of (Binary-n2 binary) env)])
+    (cond
+      [(num-op? op) (arith-binary op val1 val2)]
+      [(list-op? op)
+       (case op
+         [(cons) (ConsVal val1 val2)]
+         [else
+          (abort 'value-of "undefined operator on numbers: " op)])]
+      [else
+       (abort
+        'value-of "only operate on numbers or , but got: " (Binary-n1 binary) "," (Binary-n2 binary))])))
 
-;;;;;;;;;;;;;;;; the interpreter ;;;;;;;;;;;;;;;;
+(: value-of-nullary (→ Nullary Env Value))
+(define (value-of-nullary nullary env)
+  (let ([op (Nullary-op nullary)])
+    (case (Var-name op)
+      [(emptylist) (EmptyListVal)]
+      [else
+       (abort 'value-of
+              "undefined operator on numbers: " op)])))
 
-  ;; value-of-program : Program -> ExpVal
-  ;; Page: 71
-  (define value-of-program
-    (lambda (pgm)
-      (cases program pgm
-        (a-program (exp1)
-                   (value-of exp1 (init-env))))))
+(: value-of (→ Expr Env Value))
+(define (value-of exp env)
+  (match exp
+    [(Const n) (Const n)]
+    [(Var a) (apply-env exp env)]
+    [(Nullary op) (value-of-nullary exp env)]
+    [(Unary op n) (value-of-unary exp env)]
+    [(Binary op n1 n2) (value-of-binary exp env)]
+    [(If test then else)
+     (let ([test-val (value-of test env)])
+       (if (val->bool test-val)
+           (value-of then env)
+           (value-of else env)))]
+    [(Let var exp body)
+     (let ([val (value-of exp env)])
+       (value-of body (extend-env var val env)))]
+    ))
 
-  ;; value-of : Exp * Env -> ExpVal
-  ;; Page: 71
-  (define value-of
-    (lambda (exp env)
-      (cases expression exp
-
-        ;\commentbox{ (value-of (const-exp \n{}) \r) = \n{}}
-        (const-exp (num) (num-val num))
-
-        (minus-exp (exp1)
-          (let ((val1 (value-of exp1 env)))
-            (let ((num (expval->num val1)))
-              (num-val (- num)))))
-
-        ;\commentbox{ (value-of (var-exp \x{}) \r) = (apply-env \r \x{})}
-        (var-exp (var) (apply-env env var))
-
-        ;\commentbox{\diffspec}
-        (diff-exp (exp1 exp2)
-          (let ((val1 (value-of exp1 env))
-                (val2 (value-of exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (num-val
-               (- num1 num2)))))
-
-        (plus-exp (exp1 exp2)
-          (let ((val1 (value-of exp1 env))
-                (val2 (value-of exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (num-val
-               (+ num1 num2)))))
-        (mult-exp (exp1 exp2)
-          (let ((val1 (value-of exp1 env))
-                (val2 (value-of exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (num-val
-               (* num1 num2)))))
-        (div-exp (exp1 exp2)
-          (let ((val1 (value-of exp1 env))
-                (val2 (value-of exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (num-val
-               (/ num1 num2)))))
-
-        (null?-exp (exp1)
-          (let ((val (value-of exp1 env)))
-            (let ((lst (expval->empty-list val)))
-              (if (null? lst)
-                  (bool-val #t)
-                  (bool-val #f)))))
-
-        ;\commentbox{\zerotestspec}
-        (zero?-exp (exp1)
-          (let ((val1 (value-of exp1 env)))
-            (let ((num1 (expval->num val1)))
-              (if (zero? num1)
-                  (bool-val #t)
-                  (bool-val #f)))))
-
-        (greater?-exp (exp1 exp2)
-          (let ((val1 (value-of exp1 env))
-                (val2 (value-of exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (if (> num1 num2)
-                  (bool-val #t)
-                  (bool-val #f)))))
-        (equal?-exp (exp1 exp2)
-          (let ((val1 (value-of exp1 env))
-                (val2 (value-of exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (if (eqv? num1 num2)
-                  (bool-val #t)
-                  (bool-val #f)))))
-        (less?-exp (exp1 exp2)
-          (let ((val1 (value-of exp1 env))
-                (val2 (value-of exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (if (< num1 num2)
-                  (bool-val #t)
-                  (bool-val #f)))))
-
-        ;\commentbox{\ma{\theifspec}}
-        (if-exp (exp1 exp2 exp3)
-          (let ((val1 (value-of exp1 env)))
-            (if (expval->bool val1)
-                (value-of exp2 env)
-                (value-of exp3 env))))
-
-        ;\commentbox{\ma{\theletspecsplit}}
-        (let-exp (var exp1 body)
-          (let ((val1 (value-of exp1 env)))
-            (value-of body
-                      (extend-env var val1 env))))
-
-        (empty-list-exp ()
-                        (empty-list-val))
-        (cons-exp (car cdr)
-          (let ((val1 (value-of car env))
-                (val2 (value-of cdr env)))
-            (cons-val val1 val2)))
-        (car-exp (body)
-          (let ((val1 (value-of body env)))
-            (expval->car val1)))
-        (cdr-exp (body)
-          (let ((val1 (value-of body env)))
-            (expval->cdr val1)))
-        (list-exp (body)
-          (let ((val1 (map (value-of-curry env) body)))
-            (list-val val1)))
-
-        )))
-
-  ; helper: apply for every elem in list.
-  (define value-of-curry
-    (lambda (env)
-      (lambda (body)
-        (value-of body env))))
-
-  )
+(: value-of-program (→ Program Value))
+(define (value-of-program pgm)
+  (match pgm
+    ([AProgram exp1]
+     (value-of exp1 (init-env)))))
