@@ -44,19 +44,18 @@
 (: val->bool
    (→ Value Boolean))
 (define (val->bool c)
-  (cond
-    [(and (Const? c)
-          (boolean? (Const-v c)))
-     (Const-v c)]
-    [else (error 'val->bool
-                 "only expect type ~s"
-                 'Boolean)]))
+  (let ([b (val->sval c)])
+    (cond
+      [(boolean? b) b]
+      [else (error 'type-mismatch
+                   "only expect type ~s"
+                   'Boolean)])))
 
-(: arith-binary
-   (→ Symbol Const Const Value))
-(define (arith-binary op n m)
-  (let ([n (Const-v n)]
-        [m (Const-v m)])
+(: num-binary
+   (→ Symbol Value Value Value))
+(define (num-binary op n m)
+  (let ([n (val->sval n)]
+        [m (val->sval m)])
     (cond
       [(and (real? n) (real? m))
        (case op
@@ -68,27 +67,49 @@
          [(greater?) (Const (> n m))]
          [(less?) (Const (< n m))]
          [else
-            (abort 'arith-binary
-                   "undefined operator on numbers: " op)])]
-      [else (error 'arith-binary
+          (error 'value-of
+                 "undefined binary operator on numbers: ~s" op)])]
+      [else (error 'type-mismatch
                    "only expect type ~s"
                    'Real)])))
 
-(: arith-unary
-   (→ Symbol Const Value))
-(define (arith-unary op n)
-  (let ([n (Const-v n)])
+(: list-binary
+   (→ Symbol Value Value Value))
+(define (list-binary op n m)
+  (case op
+    [(cons) (ConsVal n m)]
+    [else
+     (error 'value-of
+            "undefined binary operator on list: ~s" op)]))
+
+(: num-unary
+   (→ Symbol Value Value))
+(define (num-unary op n)
+  (let ([n (val->sval n)])
     (cond
       [(real? n)
        (case op
-         [() (Const (- n))]
+         [(-) (Const (- n))]
          [(zero?) (Const (zero? n))]
          [else
-            (abort 'arith-unary
-                   "undefined operator on numbers: " op)])]
-      [else (error 'arith-unary
+          (error 'value-of
+                 "undefined unary operator on numbers: ~s" op)])]
+      [else (error 'type-mismatch
                    "only expect type ~s"
                    'Real)])))
+
+(: list-unary
+   (→ Symbol Value Value))
+(define (list-unary op val)
+  (case op
+    [(car) (val->car val)]
+    [(cdr) (val->cdr val)]
+    [(null?) (match val
+               [(EmptyListVal) (Const #t)]
+               [_ (Const #f)])]
+    [else
+     (error 'value-of
+            "undefined unary operator on list: ~s" op)]))
 
 (define (op? x)
   (memq x '(+ - * / < <= >= > = eq? cons greater? equal? less?)))
@@ -107,9 +128,3 @@
 
 (define (list-unary? x)
   (memq x '(null? car cdr)))
-
-(define (abort who . args)
-  (printf "~s: " who)
-  (for-each display args)
-  (display "\n")
-  (error 'infer ""))

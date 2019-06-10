@@ -44,6 +44,7 @@
     ;; https://github.com/racket/typed-racket/issues/825 `(list ,e ...)
     [`(list . ,(? list? e))
      (parse-list (map parse-sexp (cdr sexp)))]
+    [_ (error 'parse "unsupport syntax ~s" sexp)]
     ))
 
 (: parse (→ String Program))
