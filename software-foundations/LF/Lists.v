@@ -737,6 +737,14 @@ Proof.
 
 (** Now we can complete the original proof. *)
 
+Theorem plus_comm : forall n m : nat,
+    n + m = m + n.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  - simpl. rewrite <- plus_n_O. reflexivity.
+  - simpl. rewrite <- plus_n_Sm. rewrite -> IHn'. reflexivity.
+Qed.
+
 Theorem rev_length : forall l : natlist,
   length (rev l) = length l.
 Proof.
@@ -839,7 +847,7 @@ Proof.
     uncommenting the following line to see a list of theorems that we
     have proved about [rev]: *)
 
-(*  Search rev. *)
+ (* Search rev. *)
 
 (** Keep [Search] in mind as you do the following exercises and
     throughout the rest of the book; it can save you a lot of time!
@@ -858,17 +866,26 @@ Proof.
 Theorem app_nil_r : forall l : natlist,
   l ++ [] = l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l. induction l.
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHl. reflexivity.
+Qed.
 
 Theorem rev_app_distr: forall l1 l2 : natlist,
   rev (l1 ++ l2) = rev l2 ++ rev l1.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l1 l2. induction l1.
+  - simpl. rewrite -> app_nil_r. reflexivity.
+  - simpl. rewrite -> IHl1. rewrite -> app_assoc. reflexivity.
+Qed.
 
 Theorem rev_involutive : forall l : natlist,
   rev (rev l) = l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l. induction l.
+  - simpl. reflexivity.
+  - simpl. rewrite -> rev_app_distr. rewrite -> IHl. reflexivity.
+Qed.
 
 (** There is a short solution to the next one.  If you find yourself
     getting tangled up, step back and try to look for a simpler
@@ -877,60 +894,75 @@ Proof.
 Theorem app_assoc4 : forall l1 l2 l3 l4 : natlist,
   l1 ++ (l2 ++ (l3 ++ l4)) = ((l1 ++ l2) ++ l3) ++ l4.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros l1 l2 l3 l4. rewrite -> app_assoc. rewrite -> app_assoc. reflexivity.
+Qed.
 
 (** An exercise about your implementation of [nonzeros]: *)
 
 Lemma nonzeros_app : forall l1 l2 : natlist,
   nonzeros (l1 ++ l2) = (nonzeros l1) ++ (nonzeros l2).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros l1 l2. induction l1.
+  - simpl. reflexivity.
+  - simpl. { induction n.
+             - simpl. rewrite -> IHl1. reflexivity.
+             - simpl. rewrite -> IHl1. reflexivity. }
+Qed.
 
-(** **** Exercise: 2 stars, standard (eqblist)
-
-    Fill in the definition of [eqblist], which compares
-    lists of numbers for equality.  Prove that [eqblist l l]
+(** **** Exercise: 2 stars (beq_natlist)  *)
+(** Fill in the definition of [beq_natlist], which compares
+    lists of numbers for equality.  Prove that [beq_natlist l l]
     yields [true] for every list [l]. *)
 
-Fixpoint eqblist (l1 l2 : natlist) : bool
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint beq_natlist (l1 l2 : natlist) : bool :=
+  match l1, l2 with
+  | nil, nil => true
+  | _, nil => false
+  | nil, _ => false
+  | h1 :: t1, h2 :: t2 => if(beq_nat h1 h2) then beq_natlist t1 t2 else false end.
 
-Example test_eqblist1 :
-  (eqblist nil nil = true).
- (* FILL IN HERE *) Admitted.
+Example test_beq_natlist1 :
+  (beq_natlist nil nil = true).
+Proof. reflexivity. Qed.
 
-Example test_eqblist2 :
-  eqblist [1;2;3] [1;2;3] = true.
-(* FILL IN HERE *) Admitted.
+Example test_beq_natlist2 :
+  beq_natlist [1;2;3] [1;2;3] = true.
+Proof. reflexivity. Qed.
 
-Example test_eqblist3 :
-  eqblist [1;2;3] [1;2;4] = false.
- (* FILL IN HERE *) Admitted.
+Example test_beq_natlist3 :
+  beq_natlist [1;2;3] [1;2;4] = false.
+Proof. reflexivity. Qed.
 
-Theorem eqblist_refl : forall l:natlist,
-  true = eqblist l l.
+Theorem beq_natlist_refl : forall l:natlist,
+  true = beq_natlist l l.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros l. induction l.
+  - reflexivity.
+  - simpl. rewrite <- IHl. rewrite <- beq_nat_refl. reflexivity.
+Qed.
 
 (* ================================================================= *)
 (** ** List Exercises, Part 2 *)
 
+(** **** Exercise: 3 stars, advanced (bag_proofs)  *)
 (** Here are a couple of little theorems to prove about your
-    definitions about bags above. *)
+    definitions about bags earlier in the file. *)
 
-(** **** Exercise: 1 star, standard (count_member_nonzero)  *)
+Print leb.
+
+
 Theorem count_member_nonzero : forall (s : bag),
-  1 <=? (count 1 (1 :: s)) = true.
+  leb 1 (count 1 (1 :: s)) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros s. induction s.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
 
-(** The following lemma about [leb] might help you in the next exercise. *)
+(** The following lemma about [leb] might help you in the next proof. *)
 
-Theorem leb_n_Sn : forall n,
-  n <=? (S n) = true.
+Theorem ble_n_Sn : forall n,
+  leb n (S n) = true.
 Proof.
   intros n. induction n as [| n' IHn'].
   - (* 0 *)
@@ -938,38 +970,43 @@ Proof.
   - (* S n' *)
     simpl.  rewrite IHn'.  reflexivity.  Qed.
 
-(** Before doing the next exercise, make sure you've filled in the
-   definition of [remove_one] above. *)
-(** **** Exercise: 3 stars, advanced (remove_does_not_increase_count)  *)
-Theorem remove_does_not_increase_count: forall (s : bag),
-  (count 0 (remove_one 0 s)) <=? (count 0 s) = true.
+Theorem remove_decreases_count: forall (s : bag),
+  leb (count 0 (remove_one 0 s)) (count 0 s) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros s. induction s.
+  - simpl. reflexivity.
+  - simpl. { induction n.
+             - simpl. rewrite ble_n_Sn. reflexivity.
+             - simpl. rewrite IHs. reflexivity. }
+Qed.
 
-(** **** Exercise: 3 stars, standard, optional (bag_count_sum)
 
-    Write down an interesting theorem [bag_count_sum] about bags
-    involving the functions [count] and [sum], and prove it using
-    Coq.  (You may find that the difficulty of the proof depends on
-    how you defined [count]!) *)
-(* FILL IN HERE
 
-    [] *)
+(** **** Exercise: 3 stars, optional (bag_count_sum)  *)
+(** Write down an interesting theorem [bag_count_sum] about bags
+    involving the functions [count] and [sum], and prove it.*)
 
-(** **** Exercise: 4 stars, advanced (rev_injective)
+Theorem bag_count_sum : forall s1 s2 : bag, forall v : nat,
+      count v (sum s1 s2) = (count v s1) + (count v s2).
+Proof.
+  intros s1 s2 v. induction s1 as [|n1 s1' IHs1].
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHs1. { induction s2 as [|n2 s2' IHs2].
+                              - simpl. rewrite <- plus_n_O. rewrite <- plus_n_O. reflexivity.
+                                - simpl.
+Abort.
 
-    Prove that the [rev] function is injective -- that is,
-
+(** **** Exercise: 4 stars, advanced (rev_injective)  *)
+(** Prove that the [rev] function is injective -- that is,
     forall (l1 l2 : natlist), rev l1 = rev l2 -> l1 = l2.
+(There is a hard way and an easy way to do this.) *)
 
-    (There is a hard way and an easy way to do this.) *)
+Theorem rev_injective : forall l1 l2 : natlist,
+    rev l1 = rev l2 -> l1 = l2.
+Proof.
+  intros l1 l2 H. rewrite <- rev_involutive. rewrite <- H. rewrite -> rev_involutive. reflexivity.
+Qed.
 
-(* FILL IN HERE *)
-
-(* Do not modify the following line: *)
-Definition manual_grade_for_rev_injective : option (nat*string) := None.
-(** [] *)
 
 (* ################################################################# *)
 (** * Options *)
@@ -982,7 +1019,7 @@ Definition manual_grade_for_rev_injective : option (nat*string) := None.
 Fixpoint nth_bad (l:natlist) (n:nat) : nat :=
   match l with
   | nil => 42  (* arbitrary! *)
-  | a :: l' => match n =? O with
+  | a :: l' => match beq_nat n O with
                | true => a
                | false => nth_bad l' (pred n)
                end
@@ -995,8 +1032,8 @@ Fixpoint nth_bad (l:natlist) (n:nat) : nat :=
     outcome. We call this type [natoption]. *)
 
 Inductive natoption : Type :=
-  | Some (n : nat)
-  | None.
+  | Some : nat -> natoption
+  | None : natoption.
 
 (** We can then change the above definition of [nth_bad] to
     return [None] when the list is too short and [Some a] when the
@@ -1007,7 +1044,7 @@ Inductive natoption : Type :=
 Fixpoint nth_error (l:natlist) (n:nat) : natoption :=
   match l with
   | nil => None
-  | a :: l' => match n =? O with
+  | a :: l' => match beq_nat n O with
                | true => Some a
                | false => nth_error l' (pred n)
                end
@@ -1022,7 +1059,6 @@ Proof. reflexivity. Qed.
 
 (** (In the HTML version, the boilerplate proofs of these
     examples are elided.  Click on a box if you want to see one.)
-
     This example is also an opportunity to introduce one more small
     feature of Coq's programming language: conditional
     expressions... *)
@@ -1030,13 +1066,13 @@ Proof. reflexivity. Qed.
 Fixpoint nth_error' (l:natlist) (n:nat) : natoption :=
   match l with
   | nil => None
-  | a :: l' => if n =? O then Some a
+  | a :: l' => if beq_nat n O then Some a
                else nth_error' l' (pred n)
   end.
 
 (** Coq's conditionals are exactly like those found in any other
     language, with one small generalization.  Since the boolean type
-    is not built in, Coq actually supports conditional expressions over
+    is not built in, Coq actually allows conditional expressions over
     _any_ inductively defined type with exactly two constructors.  The
     guard is considered true if it evaluates to the first constructor
     in the [Inductive] definition and false if it evaluates to the
@@ -1051,33 +1087,35 @@ Definition option_elim (d : nat) (o : natoption) : nat :=
   | None => d
   end.
 
-(** **** Exercise: 2 stars, standard (hd_error)
-
-    Using the same idea, fix the [hd] function from earlier so we don't
+(** **** Exercise: 2 stars (hd_error)  *)
+(** Using the same idea, fix the [hd] function from earlier so we don't
     have to pass a default element for the [nil] case.  *)
 
-Definition hd_error (l : natlist) : natoption
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition hd_error (l : natlist) : natoption :=
+  match l with
+  | nil => None
+  | a :: l => Some a
+  end.
 
 Example test_hd_error1 : hd_error [] = None.
- (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example test_hd_error2 : hd_error [1] = Some 1.
- (* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 
 Example test_hd_error3 : hd_error [5;6] = Some 5.
- (* FILL IN HERE *) Admitted.
-(** [] *)
+Proof. reflexivity. Qed.
 
-(** **** Exercise: 1 star, standard, optional (option_elim_hd)
-
-    This exercise relates your new [hd_error] to the old [hd]. *)
+(** **** Exercise: 1 star, optional (option_elim_hd)  *)
+(** This exercise relates your new [hd_error] to the old [hd]. *)
 
 Theorem option_elim_hd : forall (l:natlist) (default:nat),
   hd default l = option_elim default (hd_error l).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros l d. induction l as [|l' IHl'].
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
 
 End NatList.
 
@@ -1093,34 +1131,33 @@ End NatList.
     "keys" of our partial maps. *)
 
 Inductive id : Type :=
-  | Id (n : nat).
+  | Id : nat -> id.
 
 (** Internally, an [id] is just a number.  Introducing a separate type
     by wrapping each nat with the tag [Id] makes definitions more
     readable and gives us the flexibility to change representations
-    later if we wish. *)
+    later if we wish.
+    We'll also need an equality test for [id]s: *)
 
-(** We'll also need an equality test for [id]s: *)
-
-Definition eqb_id (x1 x2 : id) :=
+Definition beq_id x1 x2 :=
   match x1, x2 with
-  | Id n1, Id n2 => n1 =? n2
+  | Id n1, Id n2 => beq_nat n1 n2
   end.
 
-(** **** Exercise: 1 star, standard (eqb_id_refl)  *)
-Theorem eqb_id_refl : forall x, true = eqb_id x x.
+(** **** Exercise: 1 star (beq_id_refl)  *)
+Theorem beq_id_refl : forall x, true = beq_id x x.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros x. destruct x as [n]. simpl. rewrite <- beq_nat_refl. reflexivity.
+Qed.
 
 (** Now we define the type of partial maps: *)
 
 Module PartialMap.
-Export NatList.
+Import NatList.
 
 Inductive partial_map : Type :=
-  | empty
-  | record (i : id) (v : nat) (m : partial_map).
+  | empty  : partial_map
+  | record : id -> nat -> partial_map -> partial_map.
 
 (** This declaration can be read: "There are two ways to construct a
     [partial_map]: either using the constructor [empty] to represent an
@@ -1129,13 +1166,13 @@ Inductive partial_map : Type :=
     [partial_map] with an additional key-to-value mapping." *)
 
 (** The [update] function overrides the entry for a given key in a
-    partial map by shadowing it with a new one (or simply adds a new
-    entry if the given key is not already present). *)
+    partial map (or adds a new entry if the given key is not already
+    present). *)
 
 Definition update (d : partial_map)
-                  (x : id) (value : nat)
+                  (key : id) (value : nat)
                   : partial_map :=
-  record x value d.
+  record key value d.
 
 (** Last, the [find] function searches a [partial_map] for a given
     key.  It returns [None] if the key was not found and [Some val] if
@@ -1143,46 +1180,41 @@ Definition update (d : partial_map)
     multiple values, [find] will return the first one it
     encounters. *)
 
-Fixpoint find (x : id) (d : partial_map) : natoption :=
+Fixpoint find (key : id) (d : partial_map) : natoption :=
   match d with
   | empty         => None
-  | record y v d' => if eqb_id x y
+  | record k v d' => if beq_id key k
                      then Some v
-                     else find x d'
+                     else find key d'
   end.
 
-(** **** Exercise: 1 star, standard (update_eq)  *)
+(** **** Exercise: 1 star (update_eq)  *)
 Theorem update_eq :
-  forall (d : partial_map) (x : id) (v: nat),
-    find x (update d x v) = Some v.
+  forall (d : partial_map) (k : id) (v: nat),
+    find k (update d k v) = Some v.
 Proof.
- (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros d k v. simpl. rewrite <- beq_id_refl. reflexivity.
+Qed.
 
-(** **** Exercise: 1 star, standard (update_neq)  *)
+(** **** Exercise: 1 star (update_neq)  *)
 Theorem update_neq :
-  forall (d : partial_map) (x y : id) (o: nat),
-    eqb_id x y = false -> find x (update d y o) = find x d.
+  forall (d : partial_map) (m n : id) (o: nat),
+    beq_id m n = false -> find m (update d n o) = find m d.
 Proof.
- (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros d m n o H. simpl. rewrite -> H. reflexivity.
+Qed.
+
+
 End PartialMap.
 
-(** **** Exercise: 2 stars, standard (baz_num_elts)
-
-    Consider the following inductive definition: *)
+(** **** Exercise: 2 stars (baz_num_elts)  *)
+(** Consider the following inductive definition: *)
 
 Inductive baz : Type :=
-  | Baz1 (x : baz)
-  | Baz2 (y : baz) (b : bool).
+  | Baz1 : baz -> baz
+  | Baz2 : baz -> bool -> baz.
 
-(** How _many_ elements does the type [baz] have? (Explain in words,
-    in a comment.) *)
-
-(* FILL IN HERE *)
-
-(* Do not modify the following line: *)
-Definition manual_grade_for_baz_num_elts : option (nat*string) := None.
-(** [] *)
+(** How _many_ elements does the type [baz] have?  (Answer in English
+    or the natural language of your choice.)
 
 (* Wed Jan 9 12:02:44 EST 2019 *)
