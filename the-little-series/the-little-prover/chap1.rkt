@@ -1,11 +1,11 @@
 #lang racket/base
 
 ;; Load the J-Bob language:
-(require "./j-bob/j-bob-lang.rkt")
+(require "j-bob/j-bob-lang.rkt")
 ;; Load J-Bob, our little proof assistant:
-(require "./j-bob/j-bob.rkt")
+(require "j-bob/j-bob.rkt")
 ;; Load the transcript of all proofs in the book:
-(require "./j-bob/little-prover.rkt")
+(require "j-bob/little-prover.rkt")
 ;;; Old Games, New Rules
 
 ;;; The Axioms of Cons (initial)

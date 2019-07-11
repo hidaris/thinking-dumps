@@ -1,10 +1,11 @@
 package mapreduce
 
 import (
-	"container/list"
-	"fmt"
+	"encoding/json"
 	"hash/fnv"
 	"io/ioutil"
+	"log"
+	"os"
 )
 
 func doMap(
@@ -56,33 +57,33 @@ func doMap(
 	//
 	// Your code here (Part I).
 	//
-	// 把该map任务对应的文件内容全部读出来
+	// read one of the input files
 	contents, err := ioutil.ReadFile(inFile)
 	if err != nil {
-		// panic(err)
-		fmt.Errorf("doMap read file err %s", err)
-		return
+		log.Fatal("doMap read file err %s", err)
 	}
-	// 建一个map, 记录file name和要写入该file的所有k-v对
-	intermediateMap := make(map[string]*list.List)
 
-	// 调用map函数, 得到文件内容中的所有k-v对
-	// mapF : string * string -> []KeyValue == Listof Key Value
-	resultKv := mapF(inFile, string(contents))
-
-	// 为每个k-v对算出它对应的reducer id, 用map记录一下
-	for _, kv := range resultKv {
-		reducer := ihash(kv.Key) % nReduce
-		intermediateFileName := reduceName(jobName, mapTask, reducer)
-		if currentList, ok := intermediateMap[intermediateFileName]; ok {
-			currentList.PushBack(kv)
-		} else {
-			currentList = list.New()
-			currentList.PushBack(kv)
-			intermediateMap[intermediateFileName] = currentList
+	outputFiles := make([]*os.File, nReduce) // create intermediate files
+	for i := 0; i < nReduce; i++ {
+		fileName := reduceName(jobName, mapTask, i) // filename generated
+		outputFiles[i], err = os.Create(fileName)
+		if err != nil {
+			log.Fatal("Error in creating file: ", fileName)
 		}
 	}
 
+	// call the user-defined map function (mapF) for input file's contents
+	keyValueList := mapF(inFile, string(contents))
+	// partition mapF's output into nReduce intermediate files.
+	for _, kv := range keyValueList {
+		index := ihash(kv.Key) % nReduce
+		enc := json.NewEncoder(outputFiles[index])
+		enc.Encode(kv)
+	}
+
+	for _, file := range outputFiles {
+		file.Close()
+	}
 
 }
 

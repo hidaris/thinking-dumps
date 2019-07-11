@@ -1,9 +1,9 @@
 #lang racket/base
 
 ;; Load the J-Bob language:
-(require "./j-bob-lang.rkt")
+(require "j-bob-lang.rkt")
 ;; Load J-Bob, our little proof assistant:
-(require "./j-bob.rkt")
+(require "j-bob.rkt")
 
 ;; The first argument to J-Bob/step is a list of representations
 ;; of definitions, in this case (prelude) representing J-Bob's axioms

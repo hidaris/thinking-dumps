@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require "./j-bob-lang.rkt")
+(require "j-bob-lang.rkt")
 
 (provide (all-defined-out))
 

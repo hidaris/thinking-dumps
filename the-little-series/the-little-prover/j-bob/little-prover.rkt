@@ -1,7 +1,7 @@
 #lang racket/base
 
-(require "./j-bob-lang.rkt")
-(require "./j-bob.rkt")
+(require "j-bob-lang.rkt")
+(require "j-bob.rkt")
 ;; Chapter 1
 
 (defun chapter1.example1 ()

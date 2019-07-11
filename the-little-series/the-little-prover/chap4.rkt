@@ -1,9 +1,9 @@
 #lang racket/base
 
 ;; Load the J-Bob language:
-(require "./j-bob/j-bob-lang.rkt")
+(require "j-bob/j-bob-lang.rkt")
 ;; Load J-Bob, our little proof assistant:
-(require "./j-bob/j-bob.rkt")
+(require "j-bob/j-bob.rkt")
 ;; to part of this total breakfast.
 
 (defun my-list0? (x)
@@ -18,7 +18,7 @@
 (defun my-list0?₂ (x)
   (equal x '()))
 
-(defun list1?₁ (x)
+(defun list1? (x)
   (if (atom x)
       'nil
       (list0? (cdr x))))
@@ -26,7 +26,7 @@
 (defun list2?₁ (x)
   (if (atom x)
       'nil
-      (list1?₁ (cdr x))))
+      (list1? (cdr x))))
 
 ;;; The Law of Defun (final)
 ;;; Given the total function (defun name (x1 ... xn) body),

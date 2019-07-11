@@ -1,9 +1,9 @@
 #lang racket/base
 
 ;; Load the J-Bob language:
-(require "./j-bob/j-bob-lang.rkt")
+(require "j-bob/j-bob-lang.rkt")
 ;; Load J-Bob, our little proof assistant:
-(require "./j-bob/j-bob.rkt")
+(require "j-bob/j-bob.rkt")
 ;; Think it over and over and over.
 
 (defun memb? (xs)

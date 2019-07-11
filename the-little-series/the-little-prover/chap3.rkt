@@ -1,9 +1,9 @@
 #lang racket/base
 
 ;; Load the J-Bob language:
-(require "./j-bob/j-bob-lang.rkt")
+(require "j-bob/j-bob-lang.rkt")
 ;; Load J-Bob, our little proof assistant:
-(require "./j-bob/j-bob.rkt")
+(require "j-bob/j-bob.rkt")
 ;;; What's in a name?
 
 (defun pair (x y)
