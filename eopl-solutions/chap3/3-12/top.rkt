@@ -4,8 +4,14 @@
          "./ast.rkt"
          "./parser.rkt"
          "./env.rkt"
+         "./utils.rkt"
          "./interp.rkt"
          "./tests.rkt")
+
+;;;;; for test ;;;;;
+(define get-exp cadr)
+(define get-answer caddr)
+(define get-name car)
 
 (define run
   (lambda (str)
@@ -13,12 +19,12 @@
 
 (define (test-all)
   (for ([test-item test-list])
-    (let ([the-name (car test-item)])
+    (let ([name (get-name test-item)]
+          [answer (get-answer test-item)])
       ;; if answer is error, check it and report!
-      (if (equal? (caddr test-item) 'error)
-          (check-not-exn (lambda () (run (cadr test-item)))
-                         the-name)
-          (let* ([the-test (run (cadr test-item))]
-                 [test-value (val->sval the-test)]
-                 [the-answer (caddr test-item)])
-            (check-equal? test-value the-answer the-name))))))
+      (if (equal? answer 'error)
+          (check-not-exn (λ ()
+                           (run (get-exp test-item))) name)
+          (let* ([exp (run (get-exp test-item))]
+                 [value (val->sval exp)])
+            (check-equal? value answer name))))))

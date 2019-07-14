@@ -91,5 +91,6 @@
                                             (cons (cons (- x 1)
                                                     ())
                                               ()))))" (2 (4 (3))))
+      (check-cond "(cond ((null? (list 2)) 3) ((zero? 3) 4) ((zero? 0) 5))" 5)
 
       ))
