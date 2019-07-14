@@ -39,6 +39,21 @@
        (error 'value-of
               "undefined nullary operator: ~s" op)])))
 
+(: value-of-cond
+   (→ (Listof Expr)
+      (Listof Expr)
+      Env
+      Value))
+(define value-of-cond
+  (lambda (lefts rights env)
+    (cond
+      [(null? lefts) (error 'cond "No left-hand is true")]
+      [(val->bool (value-of (car lefts) env))
+       (value-of (car rights) env)]
+      [else
+       (value-of-cond (cdr lefts) (cdr rights) env)])))
+
+
 (: value-of (→ Expr Env Value))
 (define (value-of exp env)
   (match exp
@@ -55,6 +70,8 @@
     [(Let var exp body)
      (let ([val (value-of exp env)])
        (value-of body (extend-env (Var-name var) val env)))]
+    [(Cond test-lst answer-lst)
+     (value-of-cond test-lst answer-lst env)]
     ))
 
 (: value-of-program (→ Program Value))

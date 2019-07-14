@@ -10,7 +10,8 @@
      Unary
      Binary
      If
-     Let))
+     Let
+     Cond))
 
 (struct Const
   ([v : (U Real Boolean)])
@@ -41,6 +42,11 @@
   ([var : Var]
    [val : Expr]
    [body : Expr])
+  #:transparent)
+
+(struct Cond
+  ([lefts  : (Listof Expr)]
+   [rights : (Listof Expr)])
   #:transparent)
 
 (struct Nullary
