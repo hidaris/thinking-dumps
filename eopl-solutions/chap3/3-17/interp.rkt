@@ -51,6 +51,23 @@
                           (extend-env (car kv) (cdr kv) env))
                         env
                         kvs)))]
+    [(Let* vars exps body)
+     (define (let*-env
+                [vars : (Listof Symbol)]
+                [exps : (Listof Expression)]
+                [env : Environment]) : Environment
+       (cond
+         [(null? vars) env]
+         [else (let*-env (cdr vars)
+                         (cdr exps)
+                         (extend-env
+                           (car vars)
+                           (value-of (car exps) env)
+                           env))]))
+     (if (= (length vars)
+            (length exps))
+         (value-of body (let*-env vars exps env))
+         (error 'value-of "length of let* args should be equal"))]
     [(Minus n)
      (let ([val (value-of n env)])
        (let ([sval (val->num val)])
