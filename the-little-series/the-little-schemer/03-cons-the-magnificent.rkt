@@ -1,3 +1,5 @@
+#lang racket/base
+
 ;; rember
 ;; "Rember" stands for remove a member
 ;; such as (rember 'mint '(lamb chops and mint jelly)) return (lamb chops and jelly)

@@ -1,3 +1,5 @@
+#lang racket/base
+
 (define atom?
   (lambda (a)
     (and (not (pair? a)) (not (null? a)))))
@@ -152,9 +154,9 @@
 
 (define will-stop?
   (lambda (f)
-    ...))
-(will-stop? length)   ;; #t (length '()) => 0
-(will-stop? eternity) ;; #f (eternity '()) => doesn't return a value
+    '...))
+;; (will-stop? length)   ;; #t (length '()) => 0
+;; (will-stop? eternity) ;; #f (eternity '()) => doesn't return a value
 
 ;; one more example.
 (define last-try
@@ -201,10 +203,10 @@
       (cdr l))))))
 
 ;; a good name for this length<=1
-(lambda (l)
-  (cond
-   ((null? l) 0)
-   (else (add1 (length0 (cdr l))))))
+;; (lambda (l)
+;;   (cond
+;;    ((null? l) 0)
+;;    (else (add1 (length0 (cdr l))))))
 
 (lambda (l)
   (cond
@@ -353,10 +355,10 @@
 
 ;; (mk-length eternity)只针对 length<=1，当 length > 1时，我们需要函数可以自动展开
 ;; 将 eternity 替换为 mk-length, 我们可以在 cdr 不为空链表时， 继续执行else中的展开
-(lambda (l)
-  (cond
-   ((null? l) 0)
-   (else (add1 ((mk-length mk-length) (cdr l))))))
+;; (lambda (l)
+;;   (cond
+;;    ((null? l) 0)
+;;    (else (add1 ((mk-length mk-length) (cdr l))))))
 ;; |
 ;; |
 ;; v
@@ -368,29 +370,29 @@
       ((null? l) 0)
       (else (add1 ((mk-length mk-length) (cdr l))))))))
 
-(lambda (l)
-  (cond
-   ((null? l) 0)
-   (else (add1 (((lambda (mk-length)
-                   (lambda (l)
-                     (cond
-                      ((null? l) 0)
-                      (else (add1 ((mk-length mk-length) (cdr l)))))))
-                 mk-length) (cdr l))))))
+;; (lambda (l)
+;;   (cond
+;;    ((null? l) 0)
+;;    (else (add1 (((lambda (mk-length)
+;;                    (lambda (l)
+;;                      (cond
+;;                       ((null? l) 0)
+;;                       (else (add1 ((mk-length mk-length) (cdr l)))))))
+;;                  mk-length) (cdr l))))))
 
-(lambda (l)
-  (cond
-   ((null? l) 0)
-   (else (add1 ((lambda (l)
-                  (cond
-                   ((null? l) 0)
-                   (else (add1 (((lambda (mk-length)
-                                   (lambda (l)
-                                     (cond
-                                      ((null? l) 0)
-                                      (else (add1 ((mk-length mk-length) (cdr l)))))))
-                                 mk-length) (cdr l))))))
-                (cdr l))))))
+;; (lambda (l)
+;;   (cond
+;;    ((null? l) 0)
+;;    (else (add1 ((lambda (l)
+;;                   (cond
+;;                    ((null? l) 0)
+;;                    (else (add1 (((lambda (mk-length)
+;;                                    (lambda (l)
+;;                                      (cond
+;;                                       ((null? l) 0)
+;;                                       (else (add1 ((mk-length mk-length) (cdr l)))))))
+;;                                  mk-length) (cdr l))))))
+;;                 (cdr l))))))
 
 (define length
   (lambda (l)

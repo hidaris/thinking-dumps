@@ -1,3 +1,5 @@
+#lang racket/base
+
 ;; Use help functions to abstract from representations.
 
 (define atom?

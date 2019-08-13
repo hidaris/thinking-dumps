@@ -1,3 +1,7 @@
+#lang racket/base
+
+;; need fix
+
 (define atom?
   (lambda (a)
     (and (not (null? a)) (not (pair? a)))))
@@ -10,6 +14,9 @@
 ;; a list of values?
 (define new-entry build)
 (new-entry 1 2)
+
+(define first car)
+(define second cdr)
 
 (define lookup-in-entry
   (lambda (name entry entry-f)
@@ -122,7 +129,7 @@
 
 (define table-of first)
 (define formals-of second)
-(define body-of third)
+(define body-of (lambda (lst) (list-ref lst 2)))
 
 (define evcon
   (lambda (lines table)

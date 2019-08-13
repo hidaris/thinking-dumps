@@ -1,3 +1,5 @@
+#lang racket/base
+
 ;; True or false: (lat? l)
 ;; where
 ;;   l is (Jack Sprat could eat no chicken fat)     True, because each S-expression in l is an atom.

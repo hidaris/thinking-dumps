@@ -1,3 +1,5 @@
+#lang racket/base
+
 (define rember-f
   (lambda (test? a l)
     (cond

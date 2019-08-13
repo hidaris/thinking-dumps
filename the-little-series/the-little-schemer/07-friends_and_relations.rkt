@@ -1,3 +1,5 @@
+#lang racket/base
+
 (define atom?
   (lambda (a)
     (and (not (null? a)) (not (pair? a)))))

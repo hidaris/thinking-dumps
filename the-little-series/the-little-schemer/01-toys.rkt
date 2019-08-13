@@ -1,3 +1,5 @@
+#lang racket/base
+
 ;; atom? 'a -> bool
 (define atom?
   (lambda (a)
