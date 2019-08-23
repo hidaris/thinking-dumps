@@ -2,13 +2,13 @@
 
 (provide (all-defined-out))
 
-(require "./parser.rkt")
-(require "./ast.rkt")
-(require "./env.rkt")
+(require "parser.rkt")
+(require "ast.rkt")
+(require "env.rkt")
 
 (: value-of
-   (→ Expression Environment
-      Value))
+   (-> Expression Environment
+       Value))
 (define (value-of exp env)
   (match exp
     [(Const n) (Num n)]
@@ -28,8 +28,8 @@
     [(If test then else)
      (let ([test-val (value-of test env)])
        (if (val->bool test-val)
-             (value-of then env)
-             (value-of else env)))]
+           (value-of then env)
+           (value-of else env)))]
     [(Let var exp body)
      (let ([val (value-of exp env)])
        (value-of body (extend-env var val env)))]
@@ -56,7 +56,7 @@
              [sval2 (val->num val2)])
          (Num (/ sval1 sval2))))]))
 
-(: value-of-program (→ Program Value))
+(: value-of-program (-> Program Value))
 (define (value-of-program pgm)
   (match pgm
     ([AProgram exp1]

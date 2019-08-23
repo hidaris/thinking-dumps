@@ -8,17 +8,21 @@
          "tests.rkt")
 
 (define run
-  (lambda (str)
+  (λ (str)
     (value-of-program (parse str))))
 
 (define (test-all)
   (for ([test-item test-list])
     (let ([the-name (car test-item)])
       ;; if answer is error, check it and report!
-      (if (equal? (caddr test-item) 'error)
-          (check-not-exn (lambda () (run (cadr test-item)))
-                         the-name)
+      (if (eq? (caddr test-item) 'error)
+          (check-not-exn
+           (λ ()
+             (run (cadr test-item)))
+           the-name)
           (let* ([the-test (run (cadr test-item))]
                  [test-value (val->sval the-test)]
                  [the-answer (caddr test-item)])
-            (check-equal? test-value the-answer the-name))))))
+            (check-equal? test-value
+                          the-answer
+                          the-name))))))

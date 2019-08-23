@@ -1,11 +1,11 @@
 ;; #lang typed/racket
 #lang racket
 
-(require "./ast.rkt")
+(require "ast.rkt")
 (provide parse)
 
 ;; easy version
-;; (: string->sexp (→ String Any))
+;; (: string->sexp (-> String Any))
 (define (string->sexp s)
   (read (open-input-string s)))
 
@@ -22,7 +22,7 @@
     [_ (error 'parse
               "bool exression expected")]))
 
-;; (: parse-sexp (→ Any Expression))
+;; (: parse-sexp (-> Any Expression))
 (define (parse-sexp sexp)
   (match sexp
     [(? real? x)    (Const x)]
@@ -50,7 +50,7 @@
      (Minus (parse-sexp n))]
     ))
 
-;; (: parse (→ String Program))
+;; (: parse (-> String Program))
 (define (parse str)
   (let ([sexp (string->sexp str)])
     (AProgram (parse-sexp sexp))))

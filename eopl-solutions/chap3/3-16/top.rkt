@@ -1,11 +1,11 @@
 #lang racket/base
 
 (require rackunit
-         "./ast.rkt"
-         "./parser.rkt"
-         "./env.rkt"
-         "./interp.rkt"
-         "./tests.rkt")
+         "ast.rkt"
+         "parser.rkt"
+         "env.rkt"
+         "interp.rkt"
+         "tests.rkt")
 
 (define run
   (lambda (str)

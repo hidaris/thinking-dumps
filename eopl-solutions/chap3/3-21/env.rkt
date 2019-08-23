@@ -11,13 +11,13 @@
 
 (: extend-env
    (-> Symbol Value Environment
-       Environment))
+      Environment))
 (define (extend-env var val env)
   (cons `(,var . ,val) env))
 
 (: apply-env
    (-> Symbol Environment
-       Value))
+      Value))
 (define (apply-env var env)
   (cond
     [(assq var env) => cdr]

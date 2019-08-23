@@ -87,7 +87,7 @@
 
 
 (: val->num
-   (→ Value Real))
+   (-> Value Real))
 (define (val->num val)
   (match val
     [(Num n) n]
@@ -96,7 +96,7 @@
               'Real val)]))
 
 (: val->bool
-   (→ Value Boolean))
+   (-> Value Boolean))
 (define (val->bool val)
   (match val
     [(Bool b) b]
@@ -105,7 +105,7 @@
               'Boolean val)]))
 
 (: val->closure
-   (→ Value Closure))
+   (-> Value Closure))
 (define (val->closure val)
   (match val
     [(Closure _ _ _) val]
@@ -114,7 +114,7 @@
               'Closure val)]))
 
 (: val->sval
-   (→ Value (U Boolean Real)))
+   (-> Value (U Boolean Real)))
 (define (val->sval val)
   (match val
     [(Num n) n]
@@ -124,7 +124,7 @@
               '(U Boolean Real) val)]))
 
 (: value->string
-   (→ Value String))
+   (-> Value String))
 (define (value->string v)
   (match v
     [(Num n) (~v n)]

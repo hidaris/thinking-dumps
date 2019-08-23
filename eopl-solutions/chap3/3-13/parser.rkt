@@ -1,7 +1,7 @@
 #lang racket
 
-(require "./ast.rkt")
-(require "./utils.rkt")
+(require "ast.rkt")
+(require "utils.rkt")
 (provide (all-defined-out))
 
 ;; easy version
@@ -10,7 +10,7 @@
   (read (open-input-string s)))
 
 ;; (: parse-list
-;;    (→ (Listof Expr)
+;;    (-> (Listof Expr)
 ;;       Expr))
 (define (parse-list lst)
   (match lst
@@ -23,7 +23,7 @@
 (define (list-of-two? e)
   (and (list? e) (eqv? (length e) 2)))
 
-;; (: parse-sexp (→ Any Expr))
+;; (: parse-sexp (-> Any Expr))
 (define (parse-sexp sexp)
   (match sexp
     [(? real? x) (Const x)]
@@ -54,7 +54,7 @@
     [_ (error 'parse "unsupport syntax ~s" sexp)]
     ))
 
-;; (: parse (→ String Program))
+;; (: parse (-> String Program))
 (define (parse str)
   (let ([sexp (string->sexp str)])
     (AProgram (parse-sexp sexp))))

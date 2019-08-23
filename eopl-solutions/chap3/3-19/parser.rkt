@@ -4,7 +4,7 @@
 (provide (all-defined-out))
 
 ;; easy version
-(: string->sexp (→ String Any))
+(: string->sexp (-> String Any))
 (define (string->sexp s)
   (read (open-input-string s)))
 
@@ -15,7 +15,7 @@
     [(? symbol? x)    #t]
     [_                #f]))
 
-(: parse-sexp (→ Any Expression))
+(: parse-sexp (-> Any Expression))
 (define (parse-sexp sexp)
   (match sexp
     [(? real? x) (Const x)]
@@ -52,7 +52,7 @@
                "bad app form ~s" sexp)])
      ]))
 
-(: parse (→ String Program))
+(: parse (-> String Program))
 (define (parse str)
   (let ([sexp (string->sexp str)])
     (AProgram (parse-sexp sexp))))

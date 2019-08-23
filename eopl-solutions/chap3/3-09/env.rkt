@@ -1,23 +1,23 @@
 #lang typed/racket
 
-(require "./ast.rkt")
+(require "ast.rkt")
 (provide (all-defined-out))
 
 (define-type Environment (Listof (Pairof Symbol Value)))
 
 (: empty-env
-   (→ Environment))
+   (-> Environment))
 (define (empty-env) '())
 
 (: extend-env
-   (→ Symbol Value Environment
-      Environment))
+   (-> Symbol Value Environment
+       Environment))
 (define (extend-env var val env)
   (cons `(,var . ,val) env))
 
 (: apply-env
-   (→ Symbol Environment
-      Value))
+   (-> Symbol Environment
+       Value))
 (define (apply-env var env)
   (cond
     [(assq var env) => cdr]
@@ -26,7 +26,7 @@
             "var ~s doesn't bound to a value" var)]))
 
 (: init-env
-   (→ Environment))
+   (-> Environment))
 (define (init-env)
   (extend-env
     'i (Num 1)

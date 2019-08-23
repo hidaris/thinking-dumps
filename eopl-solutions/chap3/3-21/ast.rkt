@@ -4,16 +4,7 @@
 
 ;;; Expression
 (define-type Expression
-  (U Const
-     BoolExp
-     Diff
-     If
-     Var
-     Let
-     Let*
-     Minus))
-
-(define-type BoolExp (U IsZero))
+  (U Const Diff IsZero If Var Let Minus Proc App LetProc))
 
 (struct Const
   ([n : Real])
@@ -29,7 +20,7 @@
   #:transparent)
 
 (struct If
-  ([test : BoolExp]
+  ([test : Expression]
    [then : Expression]
    [else : Expression])
   #:transparent)
@@ -39,14 +30,8 @@
   #:transparent)
 
 (struct Let
-  ([var : (Listof Symbol)]
-   [val : (Listof Expression)]
-   [body : Expression])
-  #:transparent)
-
-(struct Let*
-  ([var : (Listof Symbol)]
-   [val : (Listof Expression)]
+  ([var  : Symbol]
+   [val  : Expression]
    [body : Expression])
   #:transparent)
 
@@ -55,10 +40,28 @@
   ([n : Expression])
   #:transparent)
 
+(struct Proc
+  ([param : (Listof Symbol)]
+   [body  : Expression])
+  #:transparent)
+
+(struct LetProc
+  ([name  : Symbol]
+   [param : Symbol]
+   [pbody : Expression]
+   [ebody : Expression])
+  #:transparent)
+
+(struct App
+  ([proc : Expression]
+   [arg  : Expression])
+  #:transparent)
+
 ;;; Value
 (define-type Value
   (U Num
-     Bool))
+     Bool
+     Closure))
 
 (struct Num
   ([n : Real])
@@ -66,6 +69,14 @@
 
 (struct Bool
   ([b : Boolean])
+  #:transparent)
+
+(define-type Environment (Listof (Pairof Symbol Value)))
+
+(struct Closure
+  ([var  : (Listof Symbol)]
+   [body : Expression]
+   [env  : Environment])
   #:transparent)
 
 (define-type Program (U AProgram))
@@ -81,8 +92,8 @@
   (match val
     [(Num n) n]
     [_ (error 'type-mismatch
-              "expect type ~s "
-              'Real)]))
+              "expect type ~s give ~s"
+              'Real val)]))
 
 (: val->bool
    (-> Value Boolean))
@@ -90,8 +101,17 @@
   (match val
     [(Bool b) b]
     [_ (error 'type-mismatch
-              "expect type ~s"
-              'Boolean)]))
+              "expect type ~s give ~s"
+              'Boolean val)]))
+
+(: val->closure
+   (-> Value Closure))
+(define (val->closure val)
+  (match val
+    [(Closure _ _ _) val]
+    [_ (error 'type-mismatch
+              "expect type ~s give ~s"
+              'Closure val)]))
 
 (: val->sval
    (-> Value (U Boolean Real)))
@@ -100,8 +120,8 @@
     [(Num n) n]
     [(Bool b) b]
     [_ (error 'type-mismatch
-              "expect type ~s"
-              '(U Boolean Real))]))
+              "expect type ~s give ~s"
+              '(U Boolean Real) val)]))
 
 (: value->string
    (-> Value String))

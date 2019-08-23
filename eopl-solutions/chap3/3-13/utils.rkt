@@ -1,10 +1,10 @@
 #lang typed/racket
 
-(require "./ast.rkt")
+(require "ast.rkt")
 (provide (all-defined-out))
 
 (: val->car
-   (→ Value Value))
+   (-> Value Value))
 (define (val->car val)
   (match val
     [(ConsVal n1 n2) n1]
@@ -13,7 +13,7 @@
               'ConsVal)]))
 
 (: val->cdr
-   (→ Value Value))
+   (-> Value Value))
 (define (val->cdr val)
   (match val
     [(ConsVal n1 n2) n2]
@@ -22,7 +22,7 @@
               'ConsVal)]))
 
 (: val->sval
-   (→ Value Any))
+   (-> Value Any))
 (define (val->sval val)
   (match val
     [(Const n) n]
@@ -36,13 +36,13 @@
               'Value)]))
 
 (: value->string
-   (→ Value String))
+   (-> Value String))
 (define (value->string v)
   (match v
     [(Const n) (~v n)]))
 
 (: val->bool
-   (→ Value Boolean))
+   (-> Value Boolean))
 (define (val->bool c)
   (let ([b (val->sval c)])
     (cond
@@ -52,7 +52,7 @@
                    'Boolean)])))
 
 (: num-binary
-   (→ Symbol Value Value Value))
+   (-> Symbol Value Value Value))
 (define (num-binary op n m)
   (let ([n (val->sval n)]
         [m (val->sval m)])
@@ -74,7 +74,7 @@
                    'Real)])))
 
 (: list-binary
-   (→ Symbol Value Value Value))
+   (-> Symbol Value Value Value))
 (define (list-binary op n m)
   (case op
     [(cons) (ConsVal n m)]
@@ -83,7 +83,7 @@
             "undefined binary operator on list: ~s" op)]))
 
 (: num-unary
-   (→ Symbol Value Value))
+   (-> Symbol Value Value))
 (define (num-unary op n)
   (let ([n (val->sval n)])
     (cond
@@ -99,7 +99,7 @@
                    'Real)])))
 
 (: list-unary
-   (→ Symbol Value Value))
+   (-> Symbol Value Value))
 (define (list-unary op val)
   (case op
     [(car) (val->car val)]

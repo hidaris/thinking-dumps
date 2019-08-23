@@ -6,20 +6,15 @@
 (require "ast.rkt")
 (require "env.rkt")
 
-(: value-of-bool
-   (BoolExp Environment -> Bool))
-(define (value-of-bool exp env)
-  (match exp
-    [(IsZero n)
-     (let ([val (value-of n env)])
-       (let ([sval (val->num val)])
-         (if (zero? sval)
-             (Bool #t)
-             (Bool #f))))]))
+(: apply-procedure (Closure Value -> Value))
+(define (apply-procedure proc val)
+  (match proc
+    [(Closure param body saved-env)
+     (value-of body (extend-env param val saved-env))]))
 
 (: value-of
    (-> Expression Environment
-       Value))
+      Value))
 (define (value-of exp env)
   (match exp
     [(Const n) (Num n)]
@@ -37,13 +32,22 @@
              (Bool #t)
              (Bool #f))))]
     [(If test then else)
-     (let ([test-val (value-of-bool test env)])
+     (let ([test-val (value-of test env)])
        (if (val->bool test-val)
            (value-of then env)
            (value-of else env)))]
     [(Let var exp body)
      (let ([val (value-of exp env)])
        (value-of body (extend-env var val env)))]
+    [(Proc var body)
+     (Closure var body env)]
+    [(LetProc name var pbody ebody)
+     (let ([closure (Closure var pbody env)])
+       (value-of ebody (extend-env name closure env)))]
+    [(App proc arg)
+     (let ([v1 (value-of proc env)]
+           [v2 (value-of arg env)])
+       (apply-procedure (val->closure v1) v2))]
     [(Minus n)
      (let ([val (value-of n env)])
        (let ([sval (val->num val)])

@@ -121,7 +121,7 @@
 
 
 (: val->num
-   (→ Value Real))
+   (-> Value Real))
 (define (val->num val)
   (match val
     [(Num n) n]
@@ -130,7 +130,7 @@
               'Real val)]))
 
 (: val->bool
-   (→ Value Boolean))
+   (-> Value Boolean))
 (define (val->bool val)
   (match val
     [(Bool b) b]
@@ -139,7 +139,7 @@
               'Boolean val)]))
 
 (: val->car
-   (→ Value Value))
+   (-> Value Value))
 (define (val->car val)
   (match val
     [(ConsVal n1 n2) n1]
@@ -148,7 +148,7 @@
               'ConsVal val)]))
 
 (: val->cdr
-   (→ Value Value))
+   (-> Value Value))
 (define (val->cdr val)
   (match val
     [(ConsVal n1 n2) n2]
@@ -157,21 +157,21 @@
               'ConsVal val)]))
 
 (: val->cadr
-   (→ Value Value))
+   (-> Value Value))
 (define (val->cadr val)
   (match val
     [(ConsVal n1 n2)
      (match n2
        [(ConsVal n3 n4) n3]
        [_ (error 'type-mismatch
-              "expect type ~s give ~s"
-              'ConsVal val)])]
+                 "expect type ~s give ~s"
+                 'ConsVal val)])]
     [_ (error 'type-mismatch
               "expect type ~s give ~s"
               'ConsVal val)]))
 
 (: val->sval
-   (→ Value Any))
+   (-> Value Any))
 (define (val->sval val)
   (match val
     [(Num n) n]
@@ -186,7 +186,7 @@
               'Value val)]))
 
 (: value->string
-   (→ Value String))
+   (-> Value String))
 (define (value->string v)
   (match v
     [(Num n) (~v n)]

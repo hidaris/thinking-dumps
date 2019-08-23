@@ -1,14 +1,14 @@
 #lang typed/racket
 
-(require "./ast.rkt")
+(require "ast.rkt")
 (provide (all-defined-out))
 
 ;; easy version
-(: string->sexp (→ String Any))
+(: string->sexp (-> String Any))
 (define (string->sexp s)
   (read (open-input-string s)))
 
-(: parse-sexp (→ Any Expression))
+(: parse-sexp (-> Any Expression))
 (define (parse-sexp sexp)
   (match sexp
     [(? real? x) (Const x)]
@@ -37,7 +37,7 @@
      (IsLess (parse-sexp n1) (parse-sexp n2))]
     ))
 
-(: parse (→ String Program))
+(: parse (-> String Program))
 (define (parse str)
   (let ([sexp (string->sexp str)])
     (AProgram (parse-sexp sexp))))

@@ -1,14 +1,13 @@
 #lang typed/racket
-;; #lang racket
 
 (provide (all-defined-out))
 
-(require "./parser.rkt")
-(require "./ast.rkt")
-(require "./env.rkt")
+(require "parser.rkt")
+(require "ast.rkt")
+(require "env.rkt")
 
 (: value-of-bool
-   (BoolExp Environment → Bool))
+   (BoolExp Environment -> Bool))
 (define (value-of-bool exp env)
   (match exp
     [(IsZero n)
@@ -19,8 +18,8 @@
              (Bool #f))))]))
 
 (: value-of
-   (→ Expression Environment
-      Value))
+   (-> Expression Environment
+       Value))
 (define (value-of exp env)
   (match exp
     [(Const n) (Num n)]
@@ -40,8 +39,8 @@
     [(If test then else)
      (let ([test-val (value-of-bool test env)])
        (if (val->bool test-val)
-             (value-of then env)
-             (value-of else env)))]
+           (value-of then env)
+           (value-of else env)))]
     [(Let vars exps body)
      (let ([kvs (map (λ ([var : Symbol] [exp : Expression])
                        (cons var (value-of exp env)))
@@ -53,9 +52,9 @@
                         kvs)))]
     [(Let* vars exps body)
      (define (let*-env
-                [vars : (Listof Symbol)]
-                [exps : (Listof Expression)]
-                [env : Environment]) : Environment
+              [vars : (Listof Symbol)]
+              [exps : (Listof Expression)]
+              [env : Environment]) : Environment
        (cond
          [(null? vars) env]
          [else (let*-env (cdr vars)
@@ -113,7 +112,7 @@
          [(EmptyListVal) (Bool #t)]
          [_ (Bool #f)]))]))
 
-(: value-of-program (→ Program Value))
+(: value-of-program (-> Program Value))
 (define (value-of-program pgm)
   (match pgm
     ([AProgram exp1]

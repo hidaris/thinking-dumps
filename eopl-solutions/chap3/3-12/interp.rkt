@@ -2,12 +2,12 @@
 
 (provide (all-defined-out))
 
-(require "./parser.rkt")
-(require "./ast.rkt")
-(require "./env.rkt")
-(require "./utils.rkt")
+(require "parser.rkt")
+(require "ast.rkt")
+(require "env.rkt")
+(require "utils.rkt")
 
-(: value-of-unary (→ Unary Env Value))
+(: value-of-unary (-> Unary Env Value))
 (define (value-of-unary unary env)
   (let ([op (Var-name (Unary-op unary))]
         [val (value-of (Unary-e unary) env)])
@@ -18,7 +18,7 @@
        (error
         'value-of "only take num-unary or list-unary but got ~s" op)])))
 
-(: value-of-binary (→ Binary Env Value))
+(: value-of-binary (-> Binary Env Value))
 (define (value-of-binary binary env)
   (let ([op (Var-name (Binary-op binary))]
         [val1 (value-of (Binary-n1 binary) env)]
@@ -30,7 +30,7 @@
        (error
         'value-of "only take num-op or list-op but got ~s" op)])))
 
-(: value-of-nullary (→ Nullary Env Value))
+(: value-of-nullary (-> Nullary Env Value))
 (define (value-of-nullary nullary env)
   (let ([op (Nullary-op nullary)])
     (case (Var-name op)
@@ -40,10 +40,10 @@
               "undefined nullary operator: ~s" op)])))
 
 (: value-of-cond
-   (→ (Listof Expr)
-      (Listof Expr)
-      Env
-      Value))
+   (-> (Listof Expr)
+       (Listof Expr)
+       Env
+       Value))
 (define value-of-cond
   (lambda (lefts rights env)
     (cond
@@ -54,7 +54,7 @@
        (value-of-cond (cdr lefts) (cdr rights) env)])))
 
 
-(: value-of (→ Expr Env Value))
+(: value-of (-> Expr Env Value))
 (define (value-of exp env)
   (match exp
     [(Const n) (Const n)]
@@ -74,7 +74,7 @@
      (value-of-cond test-lst answer-lst env)]
     ))
 
-(: value-of-program (→ Program Value))
+(: value-of-program (-> Program Value))
 (define (value-of-program pgm)
   (match pgm
     ([AProgram exp1]
