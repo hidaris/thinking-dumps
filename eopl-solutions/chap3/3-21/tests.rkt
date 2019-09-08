@@ -57,8 +57,10 @@
 
       (negative-exp "(- 33)" -33)
 
-      (apply-exp "((proc x (- x 33)) 0)" -33)
+      (apply-exp "((proc (x) (- x 33)) 0)" -33)
 
-      (curried-exp "(let f (proc x (proc y (- x y))) in ((f 4) 3))" 1)
+      (apply-multi-exp "((proc (x y) (- x y)) 1 0)" 1)
+
+      (curried-exp "(let f (proc (x) (proc (y) (- x y))) in ((f 4) 3))" 1)
 
       ))

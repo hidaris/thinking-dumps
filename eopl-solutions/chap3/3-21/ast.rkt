@@ -47,14 +47,14 @@
 
 (struct LetProc
   ([name  : Symbol]
-   [param : Symbol]
+   [param : (Listof Symbol)]
    [pbody : Expression]
    [ebody : Expression])
   #:transparent)
 
 (struct App
   ([proc : Expression]
-   [arg  : Expression])
+   [args : (Listof Expression)])
   #:transparent)
 
 ;;; Value

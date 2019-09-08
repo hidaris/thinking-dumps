@@ -6,11 +6,24 @@
 (require "ast.rkt")
 (require "env.rkt")
 
-(: apply-procedure (Closure Value -> Value))
-(define (apply-procedure proc val)
+(: apply-procedure (Closure (Listof Value) -> Value))
+(define (apply-procedure proc vals)
   (match proc
-    [(Closure param body saved-env)
-     (value-of body (extend-env param val saved-env))]))
+    [(Closure params body saved-env)
+     (define (extend*-env
+              [vars : (Listof Symbol)]
+              [vals : (Listof Value)]
+              [env : Environment]
+              ) : Environment
+       (cond
+         [(null? vars) env]
+         [else (extend*-env (cdr vars)
+                            (cdr vals)
+                            (extend-env
+                              (car vars)
+                              (car vals)
+                              env))]))
+     (value-of body (extend*-env params vals saved-env))]))
 
 (: value-of
    (-> Expression Environment
@@ -39,14 +52,16 @@
     [(Let var exp body)
      (let ([val (value-of exp env)])
        (value-of body (extend-env var val env)))]
-    [(Proc var body)
-     (Closure var body env)]
+    [(Proc vars body)
+     (Closure vars body env)]
     [(LetProc name var pbody ebody)
      (let ([closure (Closure var pbody env)])
        (value-of ebody (extend-env name closure env)))]
-    [(App proc arg)
+    [(App proc args)
      (let ([v1 (value-of proc env)]
-           [v2 (value-of arg env)])
+           [v2 (map (λ ([x : Expression])
+                      (value-of x env))
+                    args)])
        (apply-procedure (val->closure v1) v2))]
     [(Minus n)
      (let ([val (value-of n env)])
