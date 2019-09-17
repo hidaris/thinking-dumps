@@ -11,13 +11,13 @@
 
 (: extend-env
    (-> Symbol Value Environment
-      Environment))
+       Environment))
 (define (extend-env var val env)
   (cons `(,var . ,val) env))
 
 (: apply-env
    (-> Symbol Environment
-      Value))
+       Value))
 (define (apply-env var env)
   (cond
     [(assq var env) => cdr]
@@ -31,9 +31,9 @@
   (extend-env
     '- (Closure `(x y) (Diff (Var 'x) (Var 'y)) (empty-env))
     (extend-env
-    'i (Num 1)
-    (extend-env
-      'v (Num 5)
+      'i (Num 1)
       (extend-env
-        'x (Num 10)
-        (empty-env))))))
+        'v (Num 5)
+        (extend-env
+          'x (Num 10)
+          (empty-env))))))
