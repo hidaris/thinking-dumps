@@ -2,4 +2,5 @@
 *.s
 *.o
 *~
+.idea/
 compiled/
