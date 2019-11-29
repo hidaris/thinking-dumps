@@ -2,8 +2,10 @@
 
 (provide (all-defined-out))
 
-(require "parser.rkt")
+(require/typed "parser.rkt"
+  [parse (-> String Program)])
 (require "ast.rkt")
+(require "env.rkt")
 (require "utils.rkt")
 
 (: apply-procedure (Closure (Listof Value) Environment -> Value))
@@ -86,10 +88,15 @@
        (let ([sval (val->bool val)])
          (Bool (not sval))))]
     [(LetRec pnames vars-lst pbodys lbody)
-     (value-of lbody (extend-env-rec pnames vars-lst pbodys env))]))
+     (value-of lbody (extend-env-rec* pnames vars-lst pbodys env))]))
 
 (: value-of-program (-> Program Value))
 (define (value-of-program pgm)
   (match pgm
     ([AProgram exp1]
      (value-of exp1 (init-env)))))
+
+(: run (-> String Value))
+(define run
+  (λ (str)
+    (value-of-program (parse str))))

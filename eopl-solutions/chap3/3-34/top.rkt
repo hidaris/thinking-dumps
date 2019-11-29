@@ -1,15 +1,9 @@
 #lang racket/base
 
 (require rackunit
-         "ast.rkt"
-         "parser.rkt"
          "interp.rkt"
          "utils.rkt"
          "tests.rkt")
-
-(define run
-  (λ (str)
-    (value-of-program (parse str))))
 
 (define (test-all)
   (for ([test-item test-list])
