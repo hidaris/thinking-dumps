@@ -9,9 +9,11 @@
 (define (empty-env) '())
 
 (: extend-env
-   (Symbol Value Environment -> Environment))
+   (Symbol (U Value (Mutable-Vectorof Any)) Environment -> Environment))
 (define (extend-env var val env)
-  (cons `(,var . ,(NormVal val)) env))
+  (if (vector? val)
+      (cons `(,var . ,val) env)
+      (cons `(,var . ,(NormVal val)) env)))
 
 (: extend-env-rec
    (Symbol (Listof Symbol) Expression Environment -> Environment))
@@ -35,22 +37,32 @@
   (append
    (map proc-item-maker pnames bvar-lsts pbodys) env))
 
+(: rebuild-env (Environment -> Environment))
+(define (rebuild-env env)
+  (match env
+    [`() `()]
+    [`((,sym . ,(? NormVal? val)) . ,saved-env)
+     (cons (car env) (rebuild-env saved-env))]
+    [`((,pname . ,(? RecVal? val)) . ,saved-env)
+     (let ([vec (make-vector 1)])
+       (let ([new-env (extend-env pname vec (rebuild-env saved-env))])
+         (vector-set! vec 0 (Closure (RecVal-vars val)
+                                     (RecVal-body val)
+                                     new-env
+                                     #f))
+         new-env))]))
 
 (: apply-env (Symbol Environment -> Value))
 (define (apply-env var env)
   (match env
-    [`()
-     (error 'apply-env "No Binding for var ~s" var)]
+    [`() (error 'apply-env "No Binding for var ~s" var)]
     [`((,sym . ,(? NormVal? val)) . ,saved-env)
      (if (eqv? var sym)
          (NormVal-val val)
          (apply-env var saved-env))]
-    [`((,pname . ,(? RecVal? val)) . ,saved-env)
+    [`((,pname . ,(? vector? val)) . ,saved-env)
      (if (eqv? var pname)
-         (Closure (RecVal-vars val)
-                  (RecVal-body val)
-                  env
-                  #f)
+         (cast (vector-ref val 0) Value)
          (apply-env var saved-env))]))
 
 (: init-env

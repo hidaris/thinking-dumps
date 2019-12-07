@@ -14,7 +14,7 @@
    [body : Expression])
   #:transparent)
 
-(define-type Bind (Pairof Symbol Val))
+(define-type Bind (Pairof Symbol (U Val (Mutable-Vectorof Any))))
 
 (define-type Environment (Listof Bind))
 
