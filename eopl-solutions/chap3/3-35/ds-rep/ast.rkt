@@ -37,25 +37,30 @@
     ->
     Environment))
 (define (extend-env-rec* pnames bvar-lsts pbodys env)
-  (append
-   (map proc-item-maker pnames bvar-lsts pbodys) env))
-
-(: proc-item-maker
-   (-> Symbol (Listof Symbol) Expression
-       (Listof (U Symbol (Listof Symbol) Expression))))
-(define proc-item-maker
-  (λ (pname bvars body)
-    (list pname bvars body)))
-
-(: assoc
-   (-> Symbol
-       (Listof (Listof (U Symbol (Listof Symbol) Expression)))
-       (U #f (Listof (U Symbol (Listof Symbol) Expression)))))
-(define (assoc var table)
   (cond
-    [(null? table) #f]
-    [(equal? (caar table) var) (car table)]
-    [else (assoc var (cdr table))]))
+    [(null? pnames) env]
+    [else (extend-env-rec
+           (car pnames)
+           (car bvar-lsts)
+           (car pbodys)
+           (extend-env-rec*
+            (cdr pnames)
+            (cdr bvar-lsts)
+            (cdr pbodys)
+            env))]))
+
+(: print-env (-> Environment Void))
+(define (print-env env)
+  (match env
+    [(empty-env) (printf "---------end\n\n")]
+    [(extend-env var val saved-env)
+     (begin (printf "env------------\n")
+            (printf "| ~a:~a |\n" var val)
+            (print-env saved-env))]
+    [(extend-env-rec pname bvars body saved-env)
+     (begin (printf "rec-env------------\n")
+            (printf "| ~a:~a |\n" pname 'function)
+            (print-env saved-env))]))
 
 (: rebuild-env
    (-> Environment Environment))
@@ -63,19 +68,15 @@
   (match env
     [(empty-env) (empty-env)]
     [(extend-env var val saved-env)
-     #:when (not (vector? val))
-     (extend-env var val (rebuild-env env))]
+     (extend-env var val (rebuild-env saved-env))]
     [(extend-env-rec pname bvars body saved-env)
      (let ([vec (make-vector 1)])
        (let ([new-env (extend-env pname vec (rebuild-env saved-env))])
-         (vector-set! vec 0 (Closure (RecVal-vars val)
-                                     (RecVal-body val)
+         (vector-set! vec 0 (Closure bvars
+                                     body
                                      new-env
                                      #f))
-         new-env))
-     (define proc-table
-       (map proc-item-maker pnames bvars-lst bodys))
-     ]))
+         new-env))]))
 
 (: apply-env
    (-> Symbol Environment Value))
@@ -84,20 +85,16 @@
     [(empty-env)
      (error 'apply-env
             "var ~s doesn't bound to a value" var)]
-    [(extend-env saved-var saved-val saved-env)
-     (if (eqv? var saved-var)
-         saved-val
+    [(extend-env sym val saved-env)
+     #:when (not (vector? val))
+     (if (eqv? var sym)
+         (cast val Value)
          (apply-env var saved-env))]
-    [(extend-env-rec pnames bvars-lst bodys saved-env)
-     (define proc-table
-       (map proc-item-maker pnames bvars-lst bodys))
-     (define has-proc (assoc var proc-table))
-     (if has-proc
-         (let ([b-var (cast (cadr has-proc) (Listof Symbol))]
-               [p-body (cast (caddr has-proc) Expression)])
-           (Closure b-var p-body env #f))
-         (apply-env var saved-env))
-     ]))
+    [(extend-env pname vec saved-env)
+     #:when (vector? vec)
+     (if (eqv? var pname)
+         (cast (vector-ref vec 0) Value)
+         (apply-env pname saved-env))]))
 
 (: init-env
    (-> Environment))

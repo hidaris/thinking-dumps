@@ -90,7 +90,7 @@
 
     (HO-nested-letrecs2
      "(letrec ([(even x) (if (zero? x) 1 (odd (- x 1)))]
-                 [(odd x) (if (zero? x) 0 (even (- x 1)))])
+               [(odd x) (if (zero? x) 0 (even (- x 1)))])
              in (odd 13))))" 1)
 
     ))
