@@ -53,7 +53,6 @@
       [else
        (value-of-cond (cdr lefts) (cdr rights) env)])))
 
-
 (: value-of (-> Expr Env Value))
 (define (value-of exp env)
   (match exp
