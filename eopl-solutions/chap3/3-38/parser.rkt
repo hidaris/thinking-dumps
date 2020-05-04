@@ -1,14 +1,14 @@
-#lang racket
+#lang typed/racket
 
 (require "ast.rkt")
 (provide (all-defined-out))
 
 ;; easy version
-;; (: string->sexp (-> String Any))
+(: string->sexp (-> String Any))
 (define (string->sexp s)
   (read (open-input-string s)))
 
-;; (: def? (Any -> Boolean))
+(: def? (Any -> Boolean))
 (define (def? x)
   (match x
     [(list 'proc _ _) #t] ;; ((proc _ _) x) or (f x) or ((f x ...) y)
@@ -16,7 +16,7 @@
     [(list (? symbol? x) _ ...)    #t]
     [_                #f]))
 
-;; (: parse-sexp (-> Any Exp))
+(: parse-sexp (-> Any Exp))
 (define (parse-sexp sexp)
   (match sexp
     [(? real? x) (Const x)]
@@ -46,11 +46,15 @@
      #:when (andmap
              (λ (lst) (and (list? lst)
                            (eqv? (length lst) 2))) e)
-     (Cond (map parse-sexp (map car e))
-           (map parse-sexp (map cadr e)))]
+     (Cond (for/list ((i : Any (in-list e)))
+             : (Listof Exp)
+             (parse-sexp (car e)))
+           (for/list ((i : Any (in-list e)))
+             : (Listof Exp)
+             (parse-sexp (cadr e))))]
     [_ (error 'parse "unsupport syntax ~s" sexp)]))
 
-;; (: parse (-> String Program))
+(: parse (-> String Program))
 (define (parse str)
   (let ([sexp (string->sexp str)])
     (AProgram (parse-sexp sexp))))

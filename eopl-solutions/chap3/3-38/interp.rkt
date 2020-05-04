@@ -2,8 +2,9 @@
 
 (provide (all-defined-out))
 
-(require/typed "parser.rkt"
-  [parse (-> String Program)])
+;; (require/typed "parser.rkt"
+;;   [parse (-> String Program)])
+(require "parser.rkt")
 (require "ast.rkt")
 (require "env.rkt")
 (require "translator.rkt")
