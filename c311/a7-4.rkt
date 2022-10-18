@@ -44,7 +44,7 @@
        (app-k k (closure body env))]
       [`(app ,rator ,rand)
        (value-of-cps rator env (*-rator-k rand env k))])))
- 
+
 (define empty-env
   (lambda ()
     `(empty-env)))
@@ -71,7 +71,7 @@
        (if (zero? n)
            (app-k k a)
            (apply-env env (sub1 n) k))])))
- 
+
 (define empty-k
   (lambda ()
     `(empty-k)))
@@ -169,8 +169,8 @@
                 4)
   (check-equal? (value-of-cps '(app (lambda (app (app (var 0) (var 0)) (const 2)))
                                     (lambda
-                                        (lambda 
-                                            (if (zero (var 0))  
+                                        (lambda
+                                            (if (zero (var 0))
                                                 (const 1)
                                                 (app (app (var 1) (var 1)) (sub1 (var 0)))))))
                               (empty-env)
