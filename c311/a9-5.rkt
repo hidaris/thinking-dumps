@@ -18,24 +18,63 @@
 (define value-of-cps
   (lambda (exp env k)
     (union-case exp expr
-      [(const expr) (app-k k expr)]
+      [(const expr) (let* ([k* k]
+                           [v* expr])
+                      (app-k k* v*))]
       [(mult exp1 exp2)
-       (value-of-cps exp1 env (kt_*-mult-outer-k exp2 env k))]
-      [(sub1 exp) (value-of-cps exp env (kt_*-sub1-k k))]
-      [(zero exp) (value-of-cps exp env (kt_*-zero-k k))]
+       (let* ([exp* exp1]
+              [env* env]
+              [k* k]
+              [k* (kt_*-mult-outer-k exp2 env* k*)])
+         (value-of-cps exp* env* k*))]
+      [(sub1 exp) (let* ([exp* exp]
+                         [env* env]
+                         [k* k]
+                         [k* (kt_*-sub1-k k*)])
+                    (value-of-cps exp* env* k*))]
+      [(zero exp) (let* ([exp* exp]
+                         [env* env]
+                         [k* k]
+                         [k* (kt_*-zero-k k*)])
+                    (value-of-cps exp* env* k*))]
       [(if test conseq alt)
-       (value-of-cps test env (kt_*-if-k conseq alt env k))]
+       (let* ([exp* test]
+              [env* env]
+              [k* k]
+              [k* (kt_*-if-k conseq alt env* k*)])
+         (value-of-cps exp* env* k*))]
       [(let e body)
-       (value-of-cps e env (kt_*-let-k body env k))]
+       (let* ([exp* e]
+              [env* env]
+              [k* k]
+              [k* (kt_*-let-k body env* k*)])
+         (value-of-cps exp* env* k*))]
       ;; we don't need let/cc to grap cont, because we are cps!
-      [(letcc body) (value-of-cps body (envr_extend-env k env) k)]
+      [(letcc body) (let* ([exp* body]
+                           [env* env]
+                           [k* k]
+                           [env* (envr_extend-env k* env*)])
+                      (value-of-cps exp* env* k*))]
       [(throw k-exp v-exp)
-       (value-of-cps k-exp env (kt_*-throw-k v-exp env))]
-      [(var y) (apply-env env y k)]
+       (let* ([exp* k-exp]
+              [env* env]
+              [k* (kt_*-throw-k v-exp env*)])
+         (value-of-cps exp* env* k*))]
+      [(var y) (let* ([env* env]
+                      [a* y]
+                      [k* k])
+                 (apply-env env* a* k*))]
       [(lambda body)
-       (app-k k (clos_closure body env))]
+       (let* ([k* k]
+              [env* env]
+              [v* (clos_closure body env*)])
+         (app-k k* v*))]
       [(app rator rand)
-       (value-of-cps rator env (kt_*-rator-k rand env k))])))
+       (let* ([exp* rator]
+              [env* env]
+              [k* k]
+              [k* (kt_*-rator-k rand env* k*)])
+         (value-of-cps exp* env* k*))])))
 
 
 (define-union envr
@@ -49,7 +88,12 @@
   (λ (p a k)
     (union-case p clos
       [(closure body env)
-       (value-of-cps body (envr_extend-env a env) k)])))
+       (let* ([exp* body]
+              [env* env]
+              [v* a]
+              [env* (envr_extend-env v* env*)]
+              [k* k])
+         (value-of-cps exp* env* k*))])))
 
 (define apply-env
   (lambda (env n k)
@@ -57,8 +101,14 @@
       [(empty-env) (error 'value-of "unbound identifier")]
       [(extend-env a env)
        (if (zero? n)
-           (app-k k a)
-           (apply-env env (sub1 n) k))])))
+           (let* ([k* k]
+                  [v* a])
+             (app-k k* v*))
+           (let* ([env* env]
+                  [n* n]
+                  [n* (sub1 n*)]
+                  [k* k])
+             (apply-env env* n* k*)))])))
 
 (define-union kt
   (empty-k)
@@ -77,29 +127,58 @@
 (define app-k
   (lambda (k^ v)
     (union-case k^ kt
-      [(empty-k) v]
+      [(empty-k) (let* ([v* v])
+                   v*)]
       [(*-mult-inner-k v^ k)
-        (app-k k (* v^ v))]
-      [ (*-mult-outer-k x2 env k)
-        (value-of-cps x2 env
-                    (kt_*-mult-inner-k v k))]
+       (let* ([k* k]
+              [v* v]
+              [v* (* v^ v*)])
+         (app-k k* v*))]
+      [(*-mult-outer-k x2 env k)
+       (let* ([exp* x2]
+              [env* env]
+              [k* k]
+              [k* (kt_*-mult-inner-k v k*)])
+         (value-of-cps exp* env* k*))]
       [(*-sub1-k k)
-       (app-k k (sub1 v))]
+       (let* ([k* k]
+              [v* (sub1 v)])
+         (app-k k* v*))]
       [(*-zero-k k)
-       (app-k k (zero? v))]
+       (let* ([k* k]
+              [v* (zero? v)])
+         (app-k k* v*))]
       [(*-if-k conseq alt env k)
        (if v
-          (value-of-cps conseq env k)
-          (value-of-cps alt env k))]
+           (let* ([exp* conseq]
+                  [env* env]
+                  [k* k])
+             (value-of-cps exp* env* k*))
+           (let* ([exp* alt]
+                  [env* env]
+                  [k* k])
+             (value-of-cps exp* env* k*)))]
       [(*-let-k body env k)
-       (value-of-cps body (envr_extend-env v env) k)]
+       (let* ([exp* body]
+              [env* (envr_extend-env v env)]
+              [k* k])
+         (value-of-cps exp* env* k*))]
       [(*-throw-k v-exp env)
-       (value-of-cps v-exp env v)]
+       (let* ([exp* v-exp]
+              [env* env]
+              [v* v])
+         (println v)
+         (value-of-cps exp* env* v*))]
       [(*-rand-k r k)
-       (apply-closure r v k)]
+       (let* ([r* r]
+              [v* v]
+              [k* k])
+         (apply-closure r* v* k*))]
       [(*-rator-k rand env k)
-       (value-of-cps rand env
-                    (kt_*-rand-k v k))])))
+       (let* ([exp* rand]
+              [env* env]
+              [k* (kt_*-rand-k v k)])
+         (value-of-cps exp* env* k*))])))
 
 ;; (let ((f (lambda (f)
 ;;            (lambda (n)
